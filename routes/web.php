@@ -23,6 +23,7 @@ Route::get('/cookie-policy', function () {
     return view('legal.cookie-policy');
 })->name('cookie-policy');
 
+// --- GUEST ROUTES ---
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [AuthController::class, 'login'])->name('login.post');
@@ -30,7 +31,7 @@ Route::middleware('guest')->group(function () {
     Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register');
     Route::post('/register', [AuthController::class, 'register'])->name('register.post');
 });
-
+// --- AUTHENTICATED ROUTES ---
 Route::middleware('auth')->group(function () {
     Route::get('/app', [AppController::class, 'index'])->name('app.index');
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');

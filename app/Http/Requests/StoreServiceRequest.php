@@ -23,6 +23,11 @@ class StoreServiceRequest extends FormRequest
     {
         return [
             //
+            'service_type' => 'required|string', // A chave do array (enfermagem, medica...)
+            'date'         => 'required|date|after_or_equal:today',
+            'time'         => 'required',
+            'location'     => 'required|string|min:5',
+            'notes'        => 'nullable|string' // Isto vai para o campo 'report'
         ];
     }
 }
