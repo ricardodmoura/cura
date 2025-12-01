@@ -18,7 +18,6 @@
 
     <div class="bg-white rounded-xl shadow-md p-8">
         
-        {{-- ROTA: Certifica-te que tens a rota 'services.store' no web.php --}}
         <form action="{{ route('app.service.store') }}" method="POST" class="space-y-6">
             @csrf 
             <div>

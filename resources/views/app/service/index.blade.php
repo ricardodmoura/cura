@@ -41,7 +41,6 @@
                 <div class="pl-3 space-y-1.5">
                     <h3 class="font-bold text-teal-900 text-sm">
                         {{ $service->service_type }}
-                        {{-- Se tivesses subtipo, seria: {{ $service->service_type }} - {{ $service->subtype }} --}}
                     </h3>
 
                     <div class="text-xs text-gray-500 space-y-1">

@@ -21,9 +21,9 @@ class ServiceController extends Controller
     public function index(Request $request)
     {
         // Buscar serviços que:
-        // 1. Estão pendentes
-        // 2. NÃO têm profissional atribuído
-        // 3. NÃO foram criados por mim (opcional: profissional não vê os seus próprios pedidos como paciente)
+        // Estão pendentes
+        // NÃO têm profissional atribuído
+        // NÃO foram criados por mim (Profissional não pode aceitar o próprio serviço)
         
         $query = Service::where('status', 'pending')
                         ->whereNull('professional_id')
