@@ -48,7 +48,7 @@
                     </button>
 
                     <div id="profileMenu" class="hidden absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg py-2">
-                        <a href="{{ route('app.profile.show', 1) }}" class="block px-4 py-2 text-gray-700 hover:bg-teal-50 hover:text-teal-700">Ver Perfil</a>
+                        <a href="{{ route('app.user.show', Auth::user()) }}" class="block px-4 py-2 text-gray-700 hover:bg-teal-50 hover:text-teal-700">Ver Perfil</a>
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
                             <button class="w-full text-left px-4 py-2 text-gray-700 hover:bg-teal-50 hover:text-teal-700">Terminar Sessão</button>
@@ -105,7 +105,7 @@
         <div class="px-4 py-4 space-y-3">
             <a href="{{ route('app.service.index') }}" class="block text-gray-700 hover:text-teal-700 font-medium">Serviços</a>
             <a href="{{ route('app.review.index') }}" class="block text-gray-700 hover:text-teal-700 font-medium">Avaliações</a>
-            <a href="{{ route('app.profile.show', Auth::user()->profile) }}" class="block text-gray-700 hover:text-teal-700 font-medium">Perfil</a>
+            <a href="{{ route('app.user.show', Auth::user()) }}" class="block text-gray-700 hover:text-teal-700 font-medium">Perfil</a>
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
                 <button type="submit" class="block text-left w-full text-gray-700 hover:text-teal-700 font-medium">Terminar Sessão</button>

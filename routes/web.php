@@ -5,7 +5,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\AppController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ServiceController;
-use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\ReviewController;
 use Illuminate\Support\Carbon;
 
@@ -36,7 +36,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/app', [AppController::class, 'index'])->name('app.index');
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
     Route::resource('service', ServiceController::class)->names('app.service');
-    Route::resource('profile', ProfileController::class)->names('app.profile')->except(['index', 'create', 'store']);
+    Route::resource('user', UserController::class)->names('app.user')->except(['index', 'create', 'store']);
     Route::resource('review', ReviewController::class)->names('app.review');
 });
 
