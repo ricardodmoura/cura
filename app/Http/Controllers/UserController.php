@@ -6,6 +6,8 @@ use App\Models\User;
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
 {
@@ -105,10 +107,21 @@ class UserController extends Controller
      */
     public function destroy(User $user)
     {
-        $user->medicalInfo()->delete();
-        $user->qualifications()->delete();
-        $user()->delete();
+        DB::transaction(function () use ($user) {
+            if ($user->profile()) 
+                $user->profile()->delete();
+            if ($user->medicalInfo()) 
+                $user->medicalInfo()->delete();
+            if ($user->qualifications()) 
+                $user->qualifications()->delete();
+            
+            $user->delete();
+        });
 
-        return redirect()->route('landing')->with('success', 'Profile and associated data deleted successfully.');
+        Auth::logout();
+        request()->session()->invalidate();
+        request()->session()->regenerateToken();
+
+        return redirect()->route('landing')->with('success', 'A sua conta e todos os dados associados foram apagados.');
     }
 }
