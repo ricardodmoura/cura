@@ -67,7 +67,9 @@ class AuthController extends Controller
                 'social_security_number' => $data['profile']['social_security_number'] ?? null,
             ]);
 
-            if ($data['profile']['user_type'] === UserType::PATIENT) {
+
+            $userType = UserType::tryFrom($data['profile']['user_type']);
+            if ($userType === UserType::PATIENT) {
                 $user->medicalInfo()->create([
                     'blood_type' => $data['medical_info']['blood_type'] ?? null,
                     'allergies' => $data['medical_info']['allergies'] ?? null,
@@ -79,7 +81,7 @@ class AuthController extends Controller
 
             $professionals = [UserType::MEDICAL_ASSISTANT, UserType::NURSE, UserType::DOCTOR];
             
-            if (in_array($data['profile']['user_type'], $professionals)) {
+            if (in_array($userType, $professionals)) {
                 $docPath = null;
                 if (isset($data['qualifications']['document'])) {
                     $docPath = $data['qualifications']['document']->store('qualifications', 'public');
