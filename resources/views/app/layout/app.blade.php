@@ -44,7 +44,15 @@
                 <!-- PERFIL -->
                 <div class="relative">
                     <button id="profileBtn" class="w-10 h-10 rounded-full overflow-hidden border-2 border-teal-600">
-                        <img src="{{ Auth::user()->profile_photo_url ?? asset('images/default-avatar.png') }}" class="w-full h-full object-cover">
+                        @if($user->profile && $user->profile->profile_photo)
+                            <img src="{{ asset('storage/' . $user->profile->profile_photo) }}" alt="{{ $user->name }}" class="w-full h-full object-cover">
+                        @else
+                            <div class="w-full h-full bg-teal-100 flex items-center justify-center text-teal-600">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                </svg>
+                            </div>
+                        @endif
                     </button>
 
                     <div id="profileMenu" class="hidden absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg py-2">
