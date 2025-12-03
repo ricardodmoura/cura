@@ -11,11 +11,32 @@ use App\Enums\UserType;
 
 class AuthController extends Controller
 {
+    /**
+     * Exibe o formulário de registo de novos utilizadores.
+     *
+     * @return \Illuminate\View\View
+     */
     public function showRegisterForm()
     {
         return view('auth.register');
     }
 
+    /**
+     * Processa o registo de um novo utilizador no sistema.
+     *
+     * Este método utiliza uma transação de base de dados (DB::transaction)
+     * para garantir a integridade dos dados. Cria sequencialmente:
+     * 1. O registo na tabela 'users'.
+     * 2. O perfil na tabela 'profiles' (com foto e tipo de utilizador).
+     * 3. A informação médica (apenas se for Utente).
+     * 4. As qualificações (apenas se for Profissional de Saúde).
+     *
+     * Se algum passo falhar, todas as alterações são revertidas (rollback).
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\RedirectResponse
+     * @throws \Exception Se ocorrer erro na transação.
+     */
     public function register(Request $request)
     {
         $data = $request->validate([
@@ -103,11 +124,26 @@ class AuthController extends Controller
         return redirect()->route('app.index');
     }
 
+    /**
+     * Exibe o formulário de login.
+     *
+     * @return \Illuminate\View\View
+     */
     public function showLoginForm()
     {
         return view('auth.login');
     }
 
+    /**
+     * Processa a tentativa de autenticação do utilizador.
+     *
+     * Valida as credenciais (email e password). Se forem válidas,
+     * regenera a sessão para prevenir ataques de fixação e redireciona
+     * para a dashboard.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function login(Request $request)
     {
         $credentials = $request->validate([
@@ -126,6 +162,14 @@ class AuthController extends Controller
         ])->onlyInput('email');
     }
 
+    /**
+     * Termina a sessão do utilizador (Logout).
+     *
+     * Invalida a sessão atual e regenera o token CSRF por segurança.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function logout(Request $request)
     {
         Auth::logout();
