@@ -11,32 +11,31 @@ use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+   
     public function index()
     {
         abort(404);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
+    
     public function create()
     {
         abort(404);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(StoreUserRequest $request)
     {
         abort(404);
     }
 
     /**
-     * Display the specified resource.
+     * Exibe o perfil detalhado do utilizador.
+     * 
+     * Carrega as relações necessárias (MedicalInfo, Qualifications)
+     * para exibir todas as informações no perfil.
+     * 
+     * @param  \App\Models\User  $user
+     * @return \Illuminate\View\View
      */
     public function show(User $user)
     {
@@ -46,7 +45,13 @@ class UserController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * Exibe o formulário de edição do perfil do utilizador.
+     *
+     * Carrega as relações necessárias (MedicalInfo, Qualifications)
+     * para popular o formulário de edição.
+     *
+     * @param  \App\Models\User  $user
+     * @return \Illuminate\View\View
      */
     public function edit(User $user)
     {
@@ -56,7 +61,17 @@ class UserController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * Atualiza os dados do utilizador, perfil e informações médicas.
+     *
+     * Realiza a atualização em várias tabelas relacionadas.
+     * - A password só é atualizada (hash) se o campo não estiver vazio.
+     * - A foto de perfil é processada e guardada no storage se for enviada.
+     * - Usa 'updateOrCreate' para MedicalInfo e Qualifications para garantir
+     * que os registos são criados caso não existam previamente.
+     *
+     * @param  \App\Http\Requests\UpdateUserRequest  $request
+     * @param  \App\Models\User  $user
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function update(UpdateUserRequest $request, User $user)
     {
@@ -103,7 +118,16 @@ class UserController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Remove a conta do utilizador e todos os dados associados.
+     *
+     * Implementa uma verificação de segurança para garantir que apenas
+     * o próprio utilizador pode apagar a sua conta.
+     * Utiliza uma transação para remover manualmente as relações
+     * (Profile, MedicalInfo, Qualifications) antes de remover o User,
+     * garantindo uma limpeza completa da base de dados.
+     *
+     * @param  \App\Models\User  $user
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function destroy(User $user)
     {
