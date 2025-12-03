@@ -10,6 +10,17 @@ use Carbon\Carbon;
 
 class AppController extends Controller
 {
+    /**
+     * Exibe a Dashboard principal da aplicação.
+     *
+     * Este método é responsável por:
+     * 1. Carregar o utilizador autenticado e o seu perfil.
+     * 2. Determinar o contexto (Utente vs Profissional).
+     * 3. Calcular estatísticas de serviços (Pendentes, Ativos, Completados).
+     * 4. Pegar na lista dos 5 serviços mais recentes relacionados com o utilizador.
+     *
+     * @return \Illuminate\View\View
+     */
     public function index()
     {
    
