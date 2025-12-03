@@ -17,64 +17,87 @@ class ServiceController extends Controller
         'fisioterapia' => ['label' => 'Fisioterapia', 'price' => 50.00],
     ];
     
-
+    /**
+     * MARKETPLACE: Lists pending services available for professionals to accept.
+     */
     public function index(Request $request)
     {
-        // Buscar serviços que:
-        // Estão pendentes
-        // NÃO têm profissional atribuído
-        // NÃO foram criados por mim (Profissional não pode aceitar o próprio serviço)
-        
-        $query = Service::where('status', 'pending')
+        // 1. QUERY MARKETPLACE (Serviços disponíveis para aceitar)
+        // (A lógica que já tinhas)
+        $marketplaceQuery = Service::where('status', 'pending')
                         ->whereNull('professional_id')
-                        ->where('patient_id', '!=', Auth::id()) // Opcional: não aceitar o próprio serviço
-                        ->with('patient'); // Carregar dados do Utente (Nome, etc)
+                        ->where('patient_id', '!=', Auth::id()) 
+                        ->with('patient');
 
-        // Filtro (se quiseres manter o filtro da imagem)
         if ($request->filled('filter')) {
-             $query->where('service_type', 'like', '%' . $request->filter . '%');
+             $marketplaceQuery->where('service_type', 'like', '%' . $request->filter . '%');
         }
 
-        $services = $query->orderBy('date', 'asc')->get();
+        $availableServices = $marketplaceQuery->orderBy('date', 'asc')->get();
 
-        return view('app.service.index', compact('services'));
+
+        // 2. QUERY MEUS SERVIÇOS (Serviços que eu já aceitei)
+        // Buscamos onde eu sou o profissional, status confirmado, ordenado por data
+        $myUpcomingServices = Service::where('professional_id', Auth::id())
+                        ->whereIn('status', ['confirmed', 'accepted']) // Ajusta se usares outro status
+                        ->whereDate('date', '>=', now()->toDateString()) // Apenas de hoje para a frente
+                        ->orderBy('date', 'asc')
+                        ->orderBy('time', 'asc')
+                        ->take(3) // Limite de 3 como pediste
+                        ->with('patient')
+                        ->get();
+
+        // Passamos as duas listas para a view
+        return view('app.service.index', [
+            'services' => $availableServices,      // Pool / Marketplace
+            'myUpcomingServices' => $myUpcomingServices // Meus Aceites
+        ]);
     }
 
+    /**
+     * ACTION: Professional accepts a service.
+     */
     public function accept(Service $service)
     {
-        // Verificar se já não foi apanhado por outro
+        // 1. Verify if the service is still available
         if ($service->professional_id !== null) {
             return back()->with('error', 'Este serviço já foi aceite por outro profissional.');
         }
 
-        // Atribuir ao user logado (Profissional)
+        // 2. Assign the service to the logged-in user (Professional)
         $service->update([
             'professional_id' => Auth::id(),
-            'status' => 'confirmed' // Passa a confirmado/ativo
+            'status' => 'confirmed' // Change status to confirmed/active
         ]);
 
         return back()->with('success', 'Serviço aceite com sucesso! Pode vê-lo na sua agenda.');
     }
 
+    /**
+     * Show the form for creating a new service (Patient view).
+     */
     public function create()
     {
         $catalog = $this->catalog;
         return view('app.service.create', compact('catalog'));
     }
 
+    /**
+     * Store a newly created service in storage.
+     */
     public function store(StoreServiceRequest $request)
     {
-        // O método validated() devolve apenas os campos que estão validados nas Rules do StoreServiceRequest
+        // The validated() method returns only fields validated in StoreServiceRequest rules
         $validated = $request->validated();
 
-        // Verificar se o tipo de serviço existe no catálogo
+        // Verify if service type exists in catalog
         if (!array_key_exists($validated['service_type'], $this->catalog)) {
             return back()->withErrors(['service_type' => 'Serviço inválido.']);
         }
 
         $selectedService = $this->catalog[$validated['service_type']];
 
-        // Criar o registo
+        // Create the record
         Service::create([
             'patient_id'   => Auth::id(),
             'service_type' => $selectedService['label'],
@@ -82,7 +105,7 @@ class ServiceController extends Controller
             'date'         => $validated['date'],
             'time'         => $validated['time'],
             'location'     => $validated['location'],
-            // Usa $validated['notes'] em vez de $request->notes para garantir segurança
+            // Use $validated['notes'] instead of $request->notes for security
             'report'       => $validated['notes'] ?? null, 
             'status'       => 'pending',
             'professional_id' => null,
@@ -93,19 +116,28 @@ class ServiceController extends Controller
             ->with('success', 'Serviço agendado com sucesso!');
     }
 
+    /**
+     * Display the specified resource.
+     */
     public function show(Service $service)
     {
-        // Garantir que o utilizador só pode ver os seus próprios serviços
-        if ($service->patient_id !== Auth::id()) {
-            abort(403, 'Acesso não autorizado.');
+        // Verificar permissões...
+        if ($service->patient_id !== Auth::id() && $service->professional_id !== Auth::id()) {
+            abort(403);
         }
+
+        // Carregar os dados do profissional para mostrar no card
+        $service->load('professional'); 
 
         return view('app.service.show', compact('service'));
     }
 
+    /**
+     * Show the form for editing the specified resource.
+     */
     public function edit(Service $service)
     {
-        // Garantir que o utilizador só pode editar os seus próprios serviços
+        // Ensure user can only edit their own services
         if ($service->patient_id !== Auth::id()) {
             abort(403, 'Acesso não autorizado.');
         }
@@ -114,23 +146,26 @@ class ServiceController extends Controller
         return view('app.service.edit', compact('service', 'catalog'));
     }
 
+    /**
+     * Update the specified resource in storage.
+     */
     public function update(UpdateServiceRequest $request, Service $service)
     {
-        // Segurança: Verificar se o serviço pertence ao user logado
+        // Security: Check if service belongs to logged-in user
         if ($service->patient_id !== Auth::id()) {
             abort(403);
         }
 
         $validated = $request->validated();
 
-        // Verificar catálogo para atualizar preço e label (caso o user mude o tipo de serviço)
+        // Check catalog to update price and label (in case user changed service type)
         if (!array_key_exists($validated['service_type'], $this->catalog)) {
             return back()->withErrors(['service_type' => 'Serviço inválido.']);
         }
         
         $selectedService = $this->catalog[$validated['service_type']];
 
-        // Atualizar o registo
+        // Update the record
         $service->update([
             'service_type' => $selectedService['label'],
             'price'        => $selectedService['price'],
@@ -138,11 +173,11 @@ class ServiceController extends Controller
             'time'         => $validated['time'],
             'location'     => $validated['location'],
             'report'       => $validated['notes'] ?? null,
-            'status'       => $validated['status'], // Agora atualizamos também o estado
+            'status'       => $validated['status'], // Now we update the status too
         ]);
 
         return redirect()
-            ->route('app.service.index') // Redireciona para a lista
+            ->route('app.service.index') // Redirect to list
             ->with('success', 'Serviço atualizado com sucesso!');
     }
 }
