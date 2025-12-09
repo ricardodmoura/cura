@@ -18,10 +18,11 @@
     <!-- NAVBAR -->
     <nav class="fixed top-0 left-0 right-0 bg-white shadow-md z-10">
         <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
-            <h1 class="text-2xl font-bold text-teal-700">Cura</h1>
+            <a href="{{ route('app.index') }}" class="text-2xl font-bold text-teal-700">Cura</a>
 
             <!-- VERSÃO DESKTOP (escondida em mobile) -->
             <div class="hidden lg:flex items-center space-x-6">
+                <a href="{{ route('app.index') }}" class="text-teal-700 hover:text-teal-900 font-medium transition-colors">Dashboard</a>
                 <a href="{{ route('app.service.index') }}" class="text-teal-700 hover:text-teal-900 font-medium transition-colors">Serviços</a>
                 <a href="{{ route('app.review.index') }}" class="text-teal-700 hover:text-teal-900 font-medium transition-colors">Avaliações</a>
 
@@ -111,6 +112,7 @@
             </button>
         </div>
         <div class="px-4 py-4 space-y-3">
+            <a href="{{ route('app.index') }}" class="block text-gray-700 hover:text-teal-700 font-medium">Dashboard</a>
             <a href="{{ route('app.service.index') }}" class="block text-gray-700 hover:text-teal-700 font-medium">Serviços</a>
             <a href="{{ route('app.review.index') }}" class="block text-gray-700 hover:text-teal-700 font-medium">Avaliações</a>
             <a href="{{ route('app.user.show', Auth::user()) }}" class="block text-gray-700 hover:text-teal-700 font-medium">Perfil</a>

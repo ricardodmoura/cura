@@ -36,7 +36,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/app', [AppController::class, 'index'])->name('app.index');
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
     Route::resource('service', ServiceController::class)->names('app.service');
-    Route::resource('profile', ProfileController::class)->names('app.profile')->except(['index', 'create', 'store']);
+    Route::resource('user', UserController::class)->names('app.user')->except(['index', 'create', 'store']);
     Route::resource('review', ReviewController::class)->names('app.review');
 });
 
