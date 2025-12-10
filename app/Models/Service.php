@@ -6,6 +6,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+// --- IMPORTS NECESSÁRIOS ---
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 
 class Service extends Model
 {
@@ -28,7 +31,7 @@ class Service extends Model
      */
     protected $casts = [
         'date' => 'date',
-        'time' => 'datetime:H:i', // Cast para string - "14:35"
+        'time' => 'datetime:H:i', // Cast para Carbon, formatado
         'price' => 'decimal:2',
     ];
 
@@ -54,5 +57,74 @@ class Service extends Model
     public function reviews(): HasMany
     {
         return $this->hasMany(Review::class);
+    }
+
+    // =========================================================
+    // MÉTODOS DE LÓGICA DE NEGÓCIO (ADICIONADOS AGORA)
+    // =========================================================
+
+    /**
+     * Acessor para obter a Data e Hora completas num único objeto Carbon.
+     * Útil para comparar datas facilmente.
+     */
+    public function getDateTimeAttribute()
+    {
+        // Junta a data (Y-m-d) com a hora (H:i)
+        return Carbon::parse($this->date->format('Y-m-d') . ' ' . $this->time->format('H:i'));
+    }
+
+    /**
+     * Verifica se o serviço pode ser cancelado pelo utilizador atual.
+     */
+    public function canBeCancelled()
+    {
+        $user = Auth::user();
+        
+        // Se o serviço já foi concluído ou cancelado, não se pode mexer
+        if (in_array(strtolower($this->status), ['completed', 'canceled'])) {
+            return false;
+        }
+
+        $serviceDate = $this->dateTime; // Usa o acessor que criámos acima
+        $now = now();
+
+        // Regra para Profissionais: 72h de antecedência
+        if ($user->role === 'professional') {
+            // diffInHours negativo significa que a data é no futuro. 
+            // Ex: Se o serviço é daqui a 100h, diff é -100. -100 < -72 é True.
+            return $serviceDate->diffInHours($now, false) < -72; 
+        }
+
+        // Regra para Utentes: 48h de antecedência
+        if (in_array($user->role, ['patient', 'companion'])) {
+            return $serviceDate->diffInHours($now, false) < -48;
+        }
+
+        return false;
+    }
+
+    /**
+     * Verifica se o serviço pode ser reagendado.
+     * Regra: Apenas utentes podem reagendar, e com mais de 48h.
+     */
+    public function canBeRescheduled()
+    {
+        $user = Auth::user();
+        
+        // Se já passou ou foi cancelado, nada feito
+        if (in_array(strtolower($this->status), ['completed', 'canceled'])) {
+            return false;
+        }
+
+        // Apenas utentes podem reagendar
+        if (!in_array($user->role, ['patient', 'companion'])) {
+            return false;
+        }
+
+        $serviceDate = $this->dateTime;
+        $now = now();
+
+        // Regra: Mais de 48h de antecedência
+        return $serviceDate->diffInHours($now, false) < -48;
     }
 }
