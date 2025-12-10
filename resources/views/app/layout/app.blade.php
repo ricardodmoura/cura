@@ -113,7 +113,9 @@
         </div>
         <div class="px-4 py-4 space-y-3">
             <a href="{{ route('app.index') }}" class="block text-gray-700 hover:text-teal-700 font-medium">Dashboard</a>
+            @professional
             <a href="{{ route('app.service.index') }}" class="block text-gray-700 hover:text-teal-700 font-medium">Serviços</a>
+            @endprofessional
             <a href="{{ route('app.review.index') }}" class="block text-gray-700 hover:text-teal-700 font-medium">Avaliações</a>
             <a href="{{ route('app.user.show', Auth::user()) }}" class="block text-gray-700 hover:text-teal-700 font-medium">Perfil</a>
             <form method="POST" action="{{ route('logout') }}">
