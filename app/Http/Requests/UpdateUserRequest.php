@@ -29,7 +29,7 @@ class UpdateUserRequest extends FormRequest
 
             //Profile
             'profile.phone' => 'nullable|string|max:20',
-            'profile.profile_picture' => 'nullable|image|max:2048',
+            'profile.profile_photo' => 'nullable|image|max:2048',
             'profile.user_type' => 'required|in:patient,companion,medical_assistant,nurse,doctor',
             'profile.birth_date' => 'nullable|date',
             'profile.address' => 'nullable|string|max:255',

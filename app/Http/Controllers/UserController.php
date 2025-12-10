@@ -87,11 +87,11 @@ class UserController extends Controller
         $user->update($data['user']);
 
         // Se houver upload, guardamos o ficheiro e atualizamos o caminho
-        if (isset($data['profile']['profile_picture'])) {
-            $data['profile']['profile_picture'] = $data['profile']['profile_picture']->store('profiles', 'public');
+        if (isset($data['profile']['profile_photo'])) {
+            $data['profile']['profile_photo'] = $data['profile']['profile_photo']->store('profiles', 'public');
         } else {
             // Se não houver upload, removemos a chave para não apagar a foto atual com 'null'
-            unset($data['profile']['profile_picture']);
+            unset($data['profile']['profile_photo']);
         }
 
         $user->profile()->update($data['profile']);
