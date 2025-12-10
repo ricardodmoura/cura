@@ -112,7 +112,7 @@ class ServiceController extends Controller
         ]);
 
         return redirect()
-            ->route('app.service.create')
+            ->route('app.service.index')
             ->with('success', 'Serviço agendado com sucesso!');
     }
 
