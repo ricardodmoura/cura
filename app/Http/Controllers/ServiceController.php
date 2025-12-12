@@ -24,7 +24,6 @@ class ServiceController extends Controller
     public function index(Request $request)
     {
         // 1. QUERY MARKETPLACE (Serviços disponíveis para aceitar)
-        // (A lógica que já tinhas)
         $marketplaceQuery = Service::where('status', 'pending')
                         ->whereNull('professional_id')
                         ->where('patient_id', '!=', Auth::id()) 
@@ -38,9 +37,8 @@ class ServiceController extends Controller
 
 
         // 2. QUERY MEUS SERVIÇOS (Serviços que eu já aceitei)
-        // Buscamos onde eu sou o profissional, status confirmado, ordenado por data
         $myUpcomingServices = Service::where('professional_id', Auth::id())
-                        ->whereIn('status', ['confirmed', 'accepted']) // Ajusta se usares outro status
+                        ->whereIn('status', ['confirmed', 'accepted'])
                         ->whereDate('date', '>=', now()->toDateString()) // Apenas de hoje para a frente
                         ->orderBy('date', 'asc')
                         ->orderBy('time', 'asc')

@@ -7,7 +7,6 @@
         <p class="text-teal-500 font-medium text-lg">Histórico de feedback e serviços por avaliar</p>
     </div>
 
-    {{-- Cartões de Estatísticas com Símbolos Reais --}}
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
         {{-- Avaliação Média --}}
         <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-5 flex flex-col justify-between h-40">
@@ -39,15 +38,6 @@
             <div>
                 <span class="text-xs font-semibold text-teal-500 uppercase tracking-wide">Prof. Avaliados</span>
                 <p class="text-3xl font-bold text-teal-900 mt-1">{{ $stats['pros_count'] }}</p>
-            </div>
-        </div>
-
-        {{-- Placeholder --}}
-        <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-5 flex flex-col justify-between h-40 opacity-40">
-            <div class="w-12 h-12 rounded-2xl bg-teal-50"></div>
-            <div>
-                <span class="text-xs font-semibold text-teal-300 uppercase tracking-wide">XXXXXXXXXXX</span>
-                <p class="text-3xl font-bold text-teal-200 mt-1">XX</p>
             </div>
         </div>
     </div>
