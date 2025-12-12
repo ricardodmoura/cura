@@ -60,12 +60,11 @@ class Service extends Model
     }
 
     // =========================================================
-    // MÉTODOS DE LÓGICA DE NEGÓCIO (ADICIONADOS AGORA)
+    // MÉTODOS DE LÓGICA DE NEGÓCIO 
     // =========================================================
 
     /**
      * Acessor para obter a Data e Hora completas num único objeto Carbon.
-     * Útil para comparar datas facilmente.
      */
     public function getDateTimeAttribute()
     {
