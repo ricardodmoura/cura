@@ -140,14 +140,45 @@
                         @csrf
                         <button type="submit" class="w-full h-full bg-[#D1FAE5] hover:bg-green-200 transition-colors flex items-center justify-center group cursor-pointer border-b border-white/50">
                             <div class="w-8 h-8 rounded-full border-2 border-[#10B981] flex items-center justify-center text-[#10B981] bg-transparent group-hover:bg-[#10B981] group-hover:text-white transition-all">
-                                <i data-lucide="check" class="w-5 h-5 stroke-[3]"></i>
+                                <!--
+                                category: System
+                                tags: [tick, "yes", confirm]
+                                version: "1.0"
+                                unicode: "ea5e"
+                                -->
+                                <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="32"
+                                height="32"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="#0D9A00"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                >
+                                <path d="M5 12l5 5l10 -10" />
+                                </svg>
                             </div>
                         </button>
                     </form>
 
                     <button type="button" class="h-1/2 w-full bg-[#FEE2E2] hover:bg-red-200 transition-colors flex items-center justify-center group cursor-pointer">
                         <div class="w-8 h-8 rounded-full border-2 border-[#EF4444] flex items-center justify-center text-[#EF4444] bg-transparent group-hover:bg-[#EF4444] group-hover:text-white transition-all">
-                             <i data-lucide="ban" class="w-5 h-5 stroke-[3]"></i>
+                            <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="32"
+                            height="32"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="#C40000"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            >
+                            <path d="M18 6l-12 12" />
+                            <path d="M6 6l12 12" />
+                            </svg>
                         </div>
                     </button>
                 </div>

@@ -20,10 +20,12 @@
         <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
             <a href="{{ route('app.index') }}" class="text-2xl font-bold text-teal-700">Cura</a>
 
-            <!-- VERSÃO DESKTOP (escondida em mobile) -->
+            <!-- VERSÃO DESKTOP -->
             <div class="hidden lg:flex items-center space-x-6">
                 <a href="{{ route('app.index') }}" class="text-teal-700 hover:text-teal-900 font-medium transition-colors">Dashboard</a>
+                @professional
                 <a href="{{ route('app.service.index') }}" class="text-teal-700 hover:text-teal-900 font-medium transition-colors">Serviços</a>
+                @endprofessional
                 <a href="{{ route('app.review.index') }}" class="text-teal-700 hover:text-teal-900 font-medium transition-colors">Avaliações</a>
 
                 <!-- NOTIFICAÇÕES DESKTOP -->
@@ -66,7 +68,7 @@
                 </div>
             </div>
 
-            <!-- VERSÃO MOBILE (visível apenas em mobile) -->
+            <!-- VERSÃO MOBILE -->
             <div class="flex lg:hidden items-center gap-2">
                 <!-- NOTIFICAÇÕES MOBILE -->
                 <div class="relative">
@@ -84,7 +86,7 @@
                     </button>
                 </div>
 
-                <!-- HAMBURGER MENU -->
+                <!-- BURGER MENU -->
                 <button id="menuBtn" class="p-2 text-teal-700 focus:outline-none">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>

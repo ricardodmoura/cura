@@ -1,183 +1,70 @@
 @extends('app.layout.app')
 
-@section('title', 'Criar Avaliação')
-
 @section('content')
+<div class="max-w-2xl mx-auto py-10 px-4">
+    <h1 class="text-3xl font-bold text-teal-900 mb-8 text-center">Criar Avaliação</h1>
 
-<div class="max-w-3xl mx-auto">
+    <form action="{{ route('app.review.store') }}" method="POST" class="space-y-6">
+        @csrf
+        <input type="hidden" name="service_id" value="{{ $service->id }}">
+        <input type="hidden" name="rating_overall" id="rating_value" value="0">
 
-    <!-- Header -->
-    <div class="mb-8 text-center">
-        <h1 class="text-3xl font-bold text-teal-900 mb-2">Criar Avaliação</h1>
-        <p class="text-teal-600">Partilhe a sua experiência e ajude outros utilizadores</p>
-    </div>
-
-    <form class="space-y-8">
-
-        <!-- Serviço Avaliado -->
-        <section class="bg-white rounded-xl shadow-md p-8">
-            <h2 class="text-xl font-semibold text-teal-900 mb-6 border-b border-teal-100 pb-2">
-                Serviço Avaliado
-            </h2>
-
-            <div class="space-y-6">
-
-                <!-- Profissional -->
-                <div>
-                    <label class="block text-sm font-medium text-teal-900 mb-2">Profissional <span class="text-red-500">*</span></label>
-                    <div class="relative">
-                        <select required
-                                class="w-full pl-10 pr-4 py-3 border border-teal-200 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-transparent">
-                            <option value="">Selecione o profissional</option>
-                            <option>Dr. João Silva - Enfermagem</option>
-                            <option>Dra. Maria Santos - Fisioterapia</option>
-                            <option>Dr. Pedro Costa - Cuidados Paliativos</option>
-                        </select>
-
-                        <svg xmlns="http://www.w3.org/2000/svg"
-                             class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-teal-400"
-                             fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                  d="M5.121 17.804A10.97 10.97 0 0112 15c2.39 0 4.602.746 6.879 2.804M15 10a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                    </div>
-                </div>
-
-                <!-- Tipo de Serviço -->
-                <div>
-                    <label class="block text-sm font-medium text-teal-900 mb-2">Tipo de Serviço <span class="text-red-500">*</span></label>
-                    <div class="relative">
-                        <select required
-                                class="w-full pl-10 pr-4 py-3 border border-teal-200 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-transparent">
-                            <option value="">Selecione o tipo de serviço</option>
-                            <option>Enfermagem</option>
-                            <option>Fisioterapia</option>
-                            <option>Cuidados Paliativos</option>
-                            <option>Terapia Ocupacional</option>
-                        </select>
-
-                        <svg xmlns="http://www.w3.org/2000/svg"
-                             class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-teal-400"
-                             fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                  d="M9 12h6m2 8H7a2 2 0 01-2-2V6a2 2 0 012-2h4l2 2h6a2 2 0 012 2v10a2 2 0 01-2 2z"/>
-                        </svg>
-                    </div>
-                </div>
-
+        {{-- Info do Serviço --}}
+        <div class="bg-teal-50 rounded-3xl p-6 border border-teal-100 flex justify-between items-center">
+            <div>
+                <p class="text-xs font-bold text-teal-500 uppercase">Serviço</p>
+                <h2 class="text-xl font-bold text-teal-900">{{ $service->service_type }}</h2>
+                <p class="text-sm text-teal-600">{{ $service->professional->name }}</p>
             </div>
-        </section>
-
-        <!-- Avaliação -->
-        <section class="bg-white rounded-xl shadow-md p-8">
-            <h2 class="text-xl font-semibold text-teal-900 mb-6 border-b border-teal-100 pb-2">
-                Avaliação
-            </h2>
-
-            <div class="space-y-6">
-
-                <!-- Geral -->
-                <div>
-                    <label class="block text-sm font-medium text-teal-900 mb-2">
-                        Avaliação Geral
-                    </label>
-                    <div class="flex gap-1 text-2xl">
-                        <span class="text-yellow-400">★</span>
-                        <span class="text-yellow-400">★</span>
-                        <span class="text-yellow-400">★</span>
-                        <span class="text-gray-300">★</span>
-                        <span class="text-gray-300">★</span>
-                    </div>
-                </div>
-
-                <!-- Profissionalismo -->
-                <div>
-                    <label class="block text-sm font-medium text-teal-900 mb-2">
-                        Profissionalismo
-                    </label>
-                    <div class="flex gap-1 text-2xl">
-                        <span class="text-yellow-400">★</span>
-                        <span class="text-yellow-400">★</span>
-                        <span class="text-yellow-400">★</span>
-                        <span class="text-yellow-400">★</span>
-                        <span class="text-gray-300">★</span>
-                    </div>
-                </div>
-
-                <!-- Pontualidade -->
-                <div>
-                    <label class="block text-sm font-medium text-teal-900 mb-2">
-                        Pontualidade
-                    </label>
-                    <div class="flex gap-1 text-2xl">
-                        <span class="text-yellow-400">★</span>
-                        <span class="text-yellow-400">★</span>
-                        <span class="text-gray-300">★</span>
-                        <span class="text-gray-300">★</span>
-                        <span class="text-gray-300">★</span>
-                    </div>
-                </div>
-
-                <!-- Qualidade -->
-                <div>
-                    <label class="block text-sm font-medium text-teal-900 mb-2">
-                        Qualidade do Serviço
-                    </label>
-                    <div class="flex gap-1 text-2xl">
-                        <span class="text-yellow-400">★</span>
-                        <span class="text-yellow-400">★</span>
-                        <span class="text-yellow-400">★</span>
-                        <span class="text-gray-300">★</span>
-                        <span class="text-gray-300">★</span>
-                    </div>
-                </div>
-
-            </div>
-        </section>
-
-        <!-- Comentário -->
-        <section class="bg-white rounded-xl shadow-md p-8">
-            <h2 class="text-xl font-semibold text-teal-900 mb-4">
-                Comentário
-            </h2>
-
-            <label class="block text-sm font-medium text-teal-900 mb-2">Descreva a sua experiência</label>
-            <textarea rows="6"
-                      placeholder="Partilhe detalhes sobre o serviço, o profissional e a sua experiência geral..."
-                      class="w-full px-4 py-3 border border-teal-200 rounded-xl focus:ring-2 focus:ring-teal-500 resize-none"></textarea>
-
-            <p class="text-sm text-teal-600 mt-2">Mínimo de 50 caracteres</p>
-
-            <label class="flex items-center gap-2 mt-4 cursor-pointer">
-                <input type="checkbox" class="w-4 h-4 text-teal-600 border-teal-300 rounded focus:ring-teal-500">
-                <span class="text-sm text-teal-700">Publicar avaliação anonimamente</span>
-            </label>
-        </section>
-
-        <!-- Botões -->
-        <div class="flex flex-col sm:flex-row gap-4">
-            <button type="button"
-                    onclick="history.back()"
-                    class="flex-1 bg-teal-50 hover:bg-teal-100 text-teal-700 font-semibold py-3 rounded-xl transition-colors">
-                Cancelar
-            </button>
-
-            <button type="submit"
-                    class="flex-1 bg-teal-600 hover:bg-teal-700 text-white font-semibold py-3 rounded-xl transition-colors flex items-center justify-center gap-2">
-
-                <svg xmlns="http://www.w3.org/2000/svg"
-                     class="w-5 h-5" fill="none" viewBox="0 0 24 24"
-                     stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M5 13l4 4L19 7" />
-                </svg>
-
-                Publicar Avaliação
-            </button>
         </div>
 
-    </form>
+        {{-- Estrelas Interativas --}}
+        <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-8 text-center">
+            <h3 class="text-lg font-bold text-teal-900 mb-6">Como avalia este atendimento?</h3>
+            
+            <div class="flex justify-center gap-2" id="star-container">
+                @for($i = 1; $i <= 5; $i++)
+                    <button type="button" data-val="{{ $i }}" class="star-btn transition-transform hover:scale-110">
+                        <svg class="w-10 h-10 text-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                        </svg>
+                    </button>
+                @endfor
+            </div>
+            @error('rating_overall') <p class="text-red-500 text-xs mt-2">{{ $message }}</p> @enderror
+        </div>
 
+        {{-- Comentário --}}
+        <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-8">
+            <h3 class="text-lg font-bold text-teal-900 mb-4">O seu comentário</h3>
+            <textarea name="comment" rows="5" required class="w-full p-4 border border-teal-100 rounded-2xl focus:ring-2 focus:ring-teal-500 outline-none" placeholder="Conte-nos os detalhes..."></textarea>
+        </div>
+
+        <div class="flex gap-4">
+            <button type="button" onclick="history.back()" class="flex-1 py-4 bg-gray-100 text-gray-500 rounded-2xl font-bold">Cancelar</button>
+            <button type="submit" class="flex-1 py-4 bg-teal-600 text-white rounded-2xl font-bold shadow-lg shadow-teal-200 hover:bg-teal-700 transition">Publicar</button>
+        </div>
+    </form>
 </div>
 
+<script>
+    const stars = document.querySelectorAll('.star-btn');
+    const input = document.getElementById('rating_value');
+
+    stars.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const val = btn.dataset.val;
+            input.value = val;
+
+            stars.forEach(s => {
+                const svg = s.querySelector('svg');
+                if (s.dataset.val <= val) {
+                    svg.setAttribute('fill', '#CCFBF1'); // Teal claro (preenchido)
+                } else {
+                    svg.setAttribute('fill', 'none'); // Sem preenchimento
+                }
+            });
+        });
+    });
+</script>
 @endsection

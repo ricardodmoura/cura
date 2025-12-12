@@ -11,10 +11,11 @@ use App\Http\Requests\UpdateServiceRequest;
 class ServiceController extends Controller
 {
     private $catalog = [
-        'auxiliar' => ['label' => 'Auxiliar de Saúde', 'price' => 25.00],
-        'enfermagem' => ['label' => 'Enfermagem', 'price' => 45.00],
-        'medica' => ['label' => 'Consulta Médica', 'price' => 80.00],
-        'fisioterapia' => ['label' => 'Fisioterapia', 'price' => 50.00],
+        'higiene' => ['label' => 'Higiene', 'price' => 25.00],
+        'alimentacao' => ['label' => 'Alimentação', 'price' => 45.00],
+        'penso' => ['label' => 'Penso', 'price' => 50.00],
+        'injetaveis' => ['label' => 'Injetáveis', 'price' => 80.00],
+        'consulta' => ['label' => 'Consulta Médica', 'price' => 100.00]
     ];
     
     /**
@@ -49,7 +50,7 @@ class ServiceController extends Controller
 
         // Passamos as duas listas para a view
         return view('app.service.index', [
-            'services' => $availableServices,      // Pool / Marketplace
+            'services' => $availableServices, // Pool / Marketplace
             'myUpcomingServices' => $myUpcomingServices // Meus Aceites
         ]);
     }
@@ -112,7 +113,7 @@ class ServiceController extends Controller
         ]);
 
         return redirect()
-            ->route('app.service.index')
+            ->route('app.index') // Redirect to main app dashboard
             ->with('success', 'Serviço agendado com sucesso!');
     }
 

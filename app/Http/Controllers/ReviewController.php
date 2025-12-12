@@ -3,123 +3,84 @@
 namespace App\Http\Controllers;
 
 use App\Models\Review;
-use App\Http\Requests\StoreReviewRequest;
-use App\Http\Requests\UpdateReviewRequest;
+use App\Models\Service;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Carbon\Carbon;
 
 class ReviewController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        //
-
-    $reviews = collect([
-        // 1. Exemplo: "Por Avaliar" (Baseado no Serviço 1 - Enfermagem)
-        // Na prática, isto seria um serviço concluído que ainda não tem registo na tabela 'reviews'
-        (object) [
-            'id' => null, // Ainda não tem ID de review
-            'service_id' => 1,
-            'user_id' => 1, 
-            'rating' => null,
-            'comment' => null,
-            'created_at' => null,
-            
-            // Dados Mapeados do Serviço para a View
-            'service_name' => 'Enfermagem Domiciliária',
-            'professional_name' => 'Enf. Ana Silva',
-            'date' => Carbon::parse('2024-06-15')->format('Y-m-d'),
-            'is_pending' => true, // A flag que ativa o sino e esconde o texto
-        ],
-
-        // 2. Exemplo: Avaliado com 5 Estrelas (Baseado no Serviço 2 - Consulta)
-        (object) [
-            'id' => 101,
-            'service_id' => 2,
-            'user_id' => 1,
-            'rating' => 5,
-            'comment' => 'Excelente profissional! A Dra. Emily foi muito atenciosa e esclareceu todas as minhas dúvidas com clareza.',
-            'created_at' => Carbon::parse('2024-06-12'),
-            
-            // Dados Mapeados
-            'service_name' => 'Consulta Médica Geral',
-            'professional_name' => 'Dr. Emily Smith',
-            'date' => Carbon::parse('2024-06-10')->format('Y-m-d'),
-            'is_pending' => false,
-        ],
-
-        // 3. Exemplo: Avaliado com 4 Estrelas (Baseado no Serviço 3 - Fisioterapia)
-        (object) [
-            'id' => 102,
-            'service_id' => 3,
-            'user_id' => 1,
-            'rating' => 4,
-            'comment' => 'O tratamento foi eficaz e senti melhorias logo após a sessão. O único ponto foi um ligeiro atraso no início.',
-            'created_at' => Carbon::parse('2024-06-06'),
-            
-            // Dados Mapeados
-            'service_name' => 'Fisioterapia',
-            'professional_name' => 'Dr. João Santos',
-            'date' => Carbon::parse('2024-06-05')->format('Y-m-d'),
-            'is_pending' => false,
-        ],
-    ]);
-
         $user = Auth::user();
-        //$reviews = Review::where('user_id', $user->id)->get();
-        return view('app.review.index', compact('reviews'));
+
+        // Estatísticas Reais para os cartões com símbolos
+        $stats = [
+            'average' => number_format($user->reviews()->avg('rating') ?? 0, 1),
+            'total' => $user->reviews()->count(),
+            'pros_count' => Service::where('patient_id', $user->id)
+                            ->whereHas('reviews')
+                            ->distinct('professional_id')
+                            ->count(),
+        ];
+
+        // 1. Serviços concluídos sem avaliação
+        $pending = Service::where('patient_id', $user->id)
+            ->where('status', 'completed')
+            ->whereDoesntHave('reviews')
+            ->with('professional')
+            ->get()
+            ->map(function ($s) {
+                $s->is_pending = true;
+                $s->service_name = $s->service_type;
+                $s->professional_name = $s->professional->name;
+                return $s;
+            });
+
+        // 2. Avaliações já realizadas
+        $completed = Review::where('user_id', $user->id)
+            ->with('service.professional')
+            ->latest()
+            ->get()
+            ->map(function ($r) {
+                $r->is_pending = false;
+                $r->service_name = $r->service->service_type;
+                $r->professional_name = $r->service->professional->name;
+                $r->date = $r->created_at->format('d/m/Y');
+                return $r;
+            });
+
+        $reviews = $pending->concat($completed);
+
+        return view('app.review.index', compact('reviews', 'stats'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function create(Request $request)
     {
-        //
-        return view('app.review.create');
+        $serviceId = $request->query('service_id');
+        $service = Service::where('id', $serviceId)
+            ->where('patient_id', Auth::id())
+            ->where('status', 'completed')
+            ->with('professional')
+            ->firstOrFail();
+
+        return view('app.review.create', compact('service'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(StoreReviewRequest $request)
+    public function store(Request $request)
     {
-        //
-    }
+        $validated = $request->validate([
+            'service_id' => 'required|exists:services,id',
+            'rating_overall' => 'required|integer|min:1|max:5',
+            'comment' => 'required|string|min:10',
+        ]);
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Review $review)
-    {
-        //
-        return view('app.review.show', compact('review'));
-    }
+        Review::create([
+            'user_id' => Auth::id(),
+            'service_id' => $validated['service_id'],
+            'rating' => $validated['rating_overall'],
+            'comment' => $validated['comment'],
+        ]);
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Review $review)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdateReviewRequest $request, Review $review)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Review $review)
-    {
-        //
+        return redirect()->route('app.review.index')->with('success', 'Avaliação publicada!');
     }
 }

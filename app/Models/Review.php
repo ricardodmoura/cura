@@ -17,26 +17,11 @@ class Review extends Model
         'comment',
     ];
 
-    /**
-     * Define os casts para atributos específicos.
-     */
-    protected $casts = [
-        'rating' => 'integer',
-    ];
-
-    /**
-     * Uma Avaliação (Review) pertence a um Serviço (Service).
-     */
-    public function service(): BelongsTo
-    {
+    public function service(): BelongsTo {
         return $this->belongsTo(Service::class);
     }
 
-    /**
-     * Uma Avaliação (Review) pertence a um Utilizador.
-     */
-    public function user(): BelongsTo
-    {
+    public function user(): BelongsTo {
         return $this->belongsTo(User::class);
     }
 }
