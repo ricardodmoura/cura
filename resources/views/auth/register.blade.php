@@ -170,7 +170,7 @@
                     <div>
                         <label class="block text-sm font-medium text-teal-900 mb-2">Comprovativo de Cédula/Habilitações</label>
                         <div class="border-2 border-dashed border-teal-200 rounded-xl p-6 text-center hover:border-teal-400 transition-colors cursor-pointer relative bg-teal-50/30">
-                            <input type="file" name="qualifications[document]" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" required> 
+                            <input type="file" name="qualifications[document]" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"> 
                             <svg class="w-8 h-8 text-teal-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
                             </svg>
@@ -221,44 +221,52 @@
     </div>
 
     <script>
-        document.querySelectorAll('.user-type-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                // 1. Reset Visual dos Botões
-                document.querySelectorAll('.user-type-btn').forEach(b => {
-                    b.classList.remove('bg-teal-600', 'text-white', 'shadow-md');
-                    b.classList.add('bg-teal-50', 'text-teal-700');
-                });
-                
-                // 2. Ativar Botão Clicado
-                this.classList.remove('bg-teal-50', 'text-teal-700');
-                this.classList.add('bg-teal-600', 'text-white', 'shadow-md');
-                
-                // 3. Atualizar Input Hidden
-                const userType = this.dataset.type;
-                document.getElementById('userType').value = userType;
-                
-                // 4. Lógica de Mostrar/Esconder Secções
-                const professionalSection = document.getElementById('professionalDocs');
-                const medicalSection = document.getElementById('medicalInfoSection');
-
-                const isProfessional = ['medical_assistant', 'nurse', 'doctor'].includes(userType);
-                const isPatient = (userType === 'patient');
-
-                // Toggle Profissional
-                if (isProfessional) {
-                    professionalSection.classList.remove('hidden');
-                } else {
-                    professionalSection.classList.add('hidden');
-                }
-
-                // Toggle Utente (Médico)
-                if (isPatient) {
-                    medicalSection.classList.remove('hidden');
-                } else {
-                    medicalSection.classList.add('hidden');
-                }
+    document.querySelectorAll('.user-type-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            // 1. Reset Visual dos Botões
+            document.querySelectorAll('.user-type-btn').forEach(b => {
+                b.classList.remove('bg-teal-600', 'text-white', 'shadow-md');
+                b.classList.add('bg-teal-50', 'text-teal-700');
             });
+            
+            // 2. Ativar Botão Clicado
+            this.classList.remove('bg-teal-50', 'text-teal-700');
+            this.classList.add('bg-teal-600', 'text-white', 'shadow-md');
+            
+            // 3. Atualizar Input Hidden
+            const userType = this.dataset.type;
+            document.getElementById('userType').value = userType;
+            
+            // 4. Lógica de Mostrar/Esconder Secções
+            const professionalSection = document.getElementById('professionalDocs');
+            const medicalSection = document.getElementById('medicalInfoSection');
+            
+            // Selecionar o input de ficheiro (adicionei um ID 'qualificationsDoc' no passo 1, ou usa o seletor por name)
+            const docInput = document.querySelector('input[name="qualifications[document]"]');
+
+            const isProfessional = ['medical_assistant', 'nurse', 'doctor'].includes(userType);
+            const isPatient = (userType === 'patient');
+
+            // Toggle Profissional
+            if (isProfessional) {
+                professionalSection.classList.remove('hidden');
+                // TORNAR OBRIGATÓRIO SE FOR PROFISSIONAL
+                docInput.setAttribute('required', 'required');
+            } else {
+                professionalSection.classList.add('hidden');
+                // REMOVER OBRIGATORIEDADE SE NÃO FOR PROFISSIONAL
+                docInput.removeAttribute('required');
+                docInput.value = ''; // Opcional: limpar o ficheiro se mudar de ideia
+            }
+
+            // Toggle Utente (Médico)
+            if (isPatient) {
+                medicalSection.classList.remove('hidden');
+            } else {
+                medicalSection.classList.add('hidden');
+            }
         });
-    </script>
+    });
+</script>
 </body>
 </html>

@@ -165,6 +165,16 @@
                 </div>
             </div>
 
+            <!-- Button para Eliminar Conta -->
+            <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 sm:p-8 justify-center text-center">
+                <form action="{{ route('app.user.destroy', $user) }}" method="POST" onsubmit="return confirm('Tem a certeza? Esta ação é irreversível!');">
+                    @csrf
+                    @method('DELETE') 
+                    <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700">
+                        Eliminar Conta
+                    </button>
+                </form>
+            </div>
         </div>
     </div>
 </div>

@@ -8,6 +8,7 @@ use App\Http\Requests\UpdateUserRequest;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
 
 class UserController extends Controller
 {
@@ -129,23 +130,24 @@ class UserController extends Controller
      * @param  \App\Models\User  $user
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function destroy(User $user)
+    public function destroy(Request $request)
     {
+        $user = $request->user();
+
         DB::transaction(function () use ($user) {
-            if ($user->profile()) 
-                $user->profile()->delete();
-            if ($user->medicalInfo()) 
-                $user->medicalInfo()->delete();
-            if ($user->qualifications()) 
-                $user->qualifications()->delete();
-            
+            $user->profile()->delete();
+            $user->medicalInfo()->delete();
+            $user->qualifications()->delete();
+            $user->reviews()->delete(); 
+            $user->servicesAsPatient()->delete(); 
             $user->delete();
         });
 
         Auth::logout();
-        request()->session()->invalidate();
-        request()->session()->regenerateToken();
 
-        return redirect()->route('landing')->with('success', 'A sua conta e todos os dados associados foram apagados.');
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect()->route('landing')->with('success', 'A sua conta foi eliminada com sucesso.');
     }
 }

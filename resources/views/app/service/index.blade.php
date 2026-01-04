@@ -63,9 +63,9 @@
             </div>
             
             <div class="relative flex py-8 items-center">
-                <div class="flex-grow border-t border-teal-600"></div>
-                <span class="flex-shrink-0 mx-4 text-teal-600 text-xs uppercase font-bold tracking-wider">Novos Pedidos</span>
-                <div class="flex-grow border-t border-teal-600"></div>
+                <div class="grow border-t border-teal-600"></div>
+                <span class="shrink-0 mx-4 text-teal-600 text-xs uppercase font-bold tracking-wider">Novos Pedidos</span>
+                <div class="grow border-t border-teal-600"></div>
             </div>
         </div>
     @endif
@@ -140,12 +140,6 @@
                         @csrf
                         <button type="submit" class="w-full h-full bg-[#D1FAE5] hover:bg-green-200 transition-colors flex items-center justify-center group cursor-pointer border-b border-white/50">
                             <div class="w-8 h-8 rounded-full border-2 border-[#10B981] flex items-center justify-center text-[#10B981] bg-transparent group-hover:bg-[#10B981] group-hover:text-white transition-all">
-                                <!--
-                                category: System
-                                tags: [tick, "yes", confirm]
-                                version: "1.0"
-                                unicode: "ea5e"
-                                -->
                                 <svg
                                 xmlns="http://www.w3.org/2000/svg"
                                 width="32"
