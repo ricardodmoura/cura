@@ -181,7 +181,7 @@
                     </form>
                 @endif
 
-                <a href="{{ route('app.service.index') }}"
+                <a href="javascript:history.back()"
                    class="block w-full text-center bg-teal-50 hover:bg-teal-100 text-teal-700 font-semibold py-3 rounded-xl transition-colors">
                     Voltar
                 </a>

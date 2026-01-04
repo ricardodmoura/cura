@@ -81,7 +81,7 @@
             </div>
 
             <div class="flex gap-4 pt-4">
-                <button type="button" onclick="history.back()" class="flex-1 bg-teal-50 text-teal-700 py-3 rounded-xl hover:bg-teal-100 font-semibold">Cancelar</button>
+                <a href="javascript:history.back()" class="flex-1 bg-teal-50 text-teal-700 py-3 rounded-xl hover:bg-teal-100 font-semibold">Cancelar</a>
                 <button type="submit" class="flex-1 bg-teal-600 text-white py-3 rounded-xl hover:bg-teal-700 font-semibold">Confirmar</button>
             </div>
         </form>

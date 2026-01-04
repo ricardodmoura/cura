@@ -170,7 +170,7 @@
                     <div>
                         <label class="block text-sm font-medium text-teal-900 mb-2">Comprovativo de Cédula/Habilitações</label>
                         <div class="border-2 border-dashed border-teal-200 rounded-xl p-6 text-center hover:border-teal-400 transition-colors cursor-pointer relative bg-teal-50/30">
-                            <input type="file" name="qualifications[document]" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
+                            <input type="file" name="qualifications[document]" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" required> 
                             <svg class="w-8 h-8 text-teal-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
                             </svg>
