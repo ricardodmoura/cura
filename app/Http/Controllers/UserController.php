@@ -130,24 +130,21 @@ class UserController extends Controller
      * @param  \App\Models\User  $user
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function destroy(Request $request)
+    public function destroy(User $user)
     {
-        $user = $request->user();
-
         DB::transaction(function () use ($user) {
+            // 1. Apagar perfis e dados médicos
             $user->profile()->delete();
             $user->medicalInfo()->delete();
             $user->qualifications()->delete();
             $user->reviews()->delete(); 
-            $user->servicesAsPatient()->delete(); 
+            $user->servicesAsPatient()->delete();           
+            $user->servicesAsProfessional()->delete();
             $user->delete();
         });
 
         Auth::logout();
 
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-
-        return redirect()->route('landing')->with('success', 'A sua conta foi eliminada com sucesso.');
+        return redirect()->route('landing')->with('success', 'Conta eliminada.');
     }
 }
