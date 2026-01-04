@@ -144,6 +144,8 @@ class DatabaseSeeder extends Seeder
             'created_at' => Carbon::now()->subHour(),
         ]);
 
-        $this->command->info('✅ Base de dados populada com datas coerentes!');
+        $this->command->info('Base de dados populada!');
+        $this->command->info('Utilizador Utente: ricardoUtente@cura.pt / password');
+        $this->command->info('Utilizador Médico: vitorMedico@cura.pt / password');
     }
 }
