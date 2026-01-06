@@ -69,7 +69,7 @@ class ServiceController extends Controller
             'status' => 'confirmed' // Change status to confirmed/active
         ]);
 
-        return back()->with('success', 'Serviço aceite com sucesso! Pode vê-lo na sua agenda.');
+        return redirect()->route('app.service.index')->with('success', 'Serviço aceite com sucesso! Pode vê-lo na sua agenda.');
     }
 
     /**

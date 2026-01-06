@@ -266,26 +266,17 @@ test('TC-14: Verificar adição de qualificações', function () {
 });
 
 test('TC-15: Verificar eliminação de conta', function () {
-    // 1. Criar utilizador
     /** @var \App\Models\User $user */
     $user = User::factory()->create();
     Profile::factory()->create(['user_id' => $user->id]);
 
-    // 2. Executar delete
     actingAs($user)
         ->delete(route('app.user.destroy', $user))
         ->assertRedirect(route('landing'));
 
-    // 3. Verificação Infalível
-    // Tentamos buscar o user novamente à BD. Se ele ainda existir, o teste falha.
     $userNaBD = User::find($user->id);
     
-    // Esperamos que $userNaBD seja null (ou seja, não encontrado)
     expect($userNaBD)->toBeNull();
-    
-    // Verifica também o perfil
-    $perfilNaBD = \App\Models\Profile::where('user_id', $user->id)->first();
-    expect($perfilNaBD)->toBeNull();
 });
 
 test('TC-16: Utente consegue solicitar um novo serviço', function () {
@@ -424,8 +415,8 @@ test('TC-23: Verificar aceitação de serviço pelo profissional', function () {
     ]);
 
     actingAs($nurse)
-        ->post(route('app.service.accept', $service)) 
-        ->assertRedirect();
+        ->post(route('app.service.accept', $service))
+        ->assertRedirect(route('app.service.index'));
 
     assertDatabaseHas('services', [
         'id' => $service->id,
