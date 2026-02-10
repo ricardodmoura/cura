@@ -52,11 +52,15 @@
                                 </svg>
                             </a>
 
-                            <a href="#" class="flex-1 flex items-center justify-center hover:bg-red-50 transition-colors group border-t border-gray-200">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-300 group-hover:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                            </a>
+                            <form action="{{ route('app.service.destroy', $job->id) }}" method="POST" class="flex-1 flex border-t border-gray-200" onsubmit="return confirm('Tem a certeza que deseja cancelar este serviço?');">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="w-full h-full flex items-center justify-center hover:bg-red-50 transition-colors group">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-300 group-hover:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </form>
                         </div>
                     </div>
                 @endforeach
@@ -108,7 +112,7 @@
 
     <div class="space-y-4">
         @forelse($services as $service)
-            <div class="bg-white rounded-[20px] shadow-sm overflow-hidden flex min-h-[140px]">
+            <div data-service-card class="bg-white rounded-[20px] shadow-sm overflow-hidden flex min-h-[140px]">
                 
                 <div class="flex-1 p-5 flex flex-col justify-center">
                     <h3 class="font-bold text-teal-900 text-lg mb-3">
@@ -157,7 +161,7 @@
                         </button>
                     </form>
 
-                    <button type="button" class="h-1/2 w-full bg-[#FEE2E2] hover:bg-red-200 transition-colors flex items-center justify-center group cursor-pointer">
+                    <button type="button" onclick="dismissService({{ $service->id }}, this)" class="h-1/2 w-full bg-[#FEE2E2] hover:bg-red-200 transition-colors flex items-center justify-center group cursor-pointer">
                         <div class="w-8 h-8 rounded-full border-2 border-[#EF4444] flex items-center justify-center text-[#EF4444] bg-transparent group-hover:bg-[#EF4444] group-hover:text-white transition-all">
                             <svg
                             xmlns="http://www.w3.org/2000/svg"
@@ -189,5 +193,18 @@
         @endforelse
     </div>
 </div>
+
+
+<script>
+function dismissService(serviceId, btn) {
+    const card = btn.closest('[data-service-card]');
+    if (card) {
+        card.style.transition = 'opacity 0.3s, transform 0.3s';
+        card.style.opacity = '0';
+        card.style.transform = 'translateX(100%)';
+        setTimeout(() => card.remove(), 300);
+    }
+}
+</script>
 
 @endsection

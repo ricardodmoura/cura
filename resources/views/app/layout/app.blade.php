@@ -35,10 +35,10 @@
                             <path d="M12 22c1.1 0 2-.9 2-2H10a2 2 0 002 2zm6-6V9a6 6 0 10-12 0v7l-2 2v1h16v-1l-2-2z"/>
                         </svg>
 
-                        @if(auth()->check() && auth()->user()->unreadNotifications->count() > 0)
+                        @if(auth()->check() && auth()->user()->notifications()->unread()->count() > 0)
                         <span id="notifBadge" 
                             class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full px-1">
-                            {{ auth()->user()->unreadNotifications->count() }}
+                            {{ auth()->user()->notifications()->unread()->count() }}
                         </span>
                         @endif
                     </button>
@@ -77,10 +77,10 @@
                             <path d="M12 22c1.1 0 2-.9 2-2H10a2 2 0 002 2zm6-6V9a6 6 0 10-12 0v7l-2 2v1h16v-1l-2-2z"/>
                         </svg>
 
-                        @if(auth()->check() && auth()->user()->unreadNotifications->count() > 0)
+                        @if(auth()->check() && auth()->user()->notifications()->unread()->count() > 0)
                         <span id="notifBadgeMobile" 
                             class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full px-1">
-                            {{ auth()->user()->unreadNotifications->count() }}
+                            {{ auth()->user()->notifications()->unread()->count() }}
                         </span>
                         @endif
                     </button>

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\UserType;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -107,5 +108,30 @@ class User extends Authenticatable
     public function logs(): HasMany
     {
         return $this->hasMany(Log::class);
+    }
+
+    /**
+     * Verifica se o utilizador é um profissional de saúde.
+     */
+    public function isProfessional(): bool
+    {
+        $professions = [
+            UserType::DOCTOR->value,
+            UserType::NURSE->value,
+            UserType::MEDICAL_ASSISTANT->value,
+        ];
+
+        return $this->profile && in_array($this->profile->user_type, $professions);
+    }
+
+    /**
+     * Verifica se o utilizador é um utente ou acompanhante.
+     */
+    public function isPatientOrCompanion(): bool
+    {
+        return $this->profile && in_array($this->profile->user_type, [
+            UserType::PATIENT->value,
+            UserType::COMPANION->value,
+        ]);
     }
 }

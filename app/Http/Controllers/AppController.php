@@ -21,7 +21,7 @@ class AppController extends Controller
         // 2. Filtrar pelo tipo de utilizador
         // Se for profissional, vê serviços onde ele é o PRESTADOR
         // Se for utente, vê serviços onde ele é o CLIENTE
-        if ($user->role === 'professional') {
+        if ($user->isProfessional()) {
             $query->where('professional_id', $user->id);
         } else {
             $query->where('patient_id', $user->id);
@@ -40,7 +40,7 @@ class AppController extends Controller
             // Média (Rating):
             // Como ainda não temos tabela de reviews ligada, deixamos um valor dinâmico
             // Apenas profissionais têm rating visível habitualmente
-            'rating'    => $user->role === 'professional' ? 4.9 : '--', 
+            'rating'    => $user->isProfessional() ? 4.9 : '--',
         ];
 
         // 4. Obter a lista dos 5 serviços mais recentes para o histórico

@@ -66,19 +66,21 @@
                     </svg>
                 </div>
                 <div>
-                    <p class="text-teal-500 font-medium text-xs sm:text-sm">PLACEHOLDER</p>
-                    <p class="text-xl sm:text-3xl font-bold text-teal-900 mt-0.5 sm:mt-1"> -- </p>
+                    <p class="text-teal-500 font-medium text-xs sm:text-sm">Este Mês</p>
+                    <p class="text-xl sm:text-3xl font-bold text-teal-900 mt-0.5 sm:mt-1">{{ $stats['this_month'] }}</p>
                 </div>
             </div>
         </div>
 
         <div class="flex justify-end mb-6">
-            <button class="bg-white text-gray-700 px-5 py-2.5 rounded-full shadow-sm border border-gray-200 hover:bg-gray-50 transition flex items-center gap-2 text-sm font-medium">
-                Filtrar 
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                </svg>
-            </button>
+            <form action="{{ route('app.review.index') }}" method="GET">
+                <select name="rating" onchange="this.form.submit()" class="appearance-none bg-white text-gray-700 px-5 py-2.5 pr-10 rounded-full shadow-sm border border-gray-200 hover:bg-gray-50 transition text-sm font-medium cursor-pointer focus:outline-none focus:ring-2 focus:ring-teal-500">
+                    <option value="">Todas as Avaliações</option>
+                    @for($i = 5; $i >= 1; $i--)
+                        <option value="{{ $i }}" {{ request('rating') == $i ? 'selected' : '' }}>{{ $i }} {{ $i === 1 ? 'Estrela' : 'Estrelas' }}</option>
+                    @endfor
+                </select>
+            </form>
         </div>
 
         @if($reviews->isEmpty())

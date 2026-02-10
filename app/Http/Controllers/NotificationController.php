@@ -14,10 +14,10 @@ class NotificationController extends Controller
      */
     public function index()
     {
-        /*$user = Auth::user();
-        $notifications = $user->notifications()->orderBy('created_at', 'desc')->get();
+        $user = Auth::user();
+        $notifications = $user->notifications()->orderBy('created_at', 'desc')->paginate(20);
 
-        return view('app.notifications.index', compact('notifications'));*/
+        return view('app.notification.index', compact('notifications'));
     }
 
     /**
@@ -34,6 +34,30 @@ class NotificationController extends Controller
     public function store(StoreNotificationRequest $request)
     {
         //
+    }
+
+    /**
+     * Mark a notification as read.
+     */
+    public function markAsRead(Notification $notification)
+    {
+        if ($notification->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        $notification->markAsRead();
+
+        return response()->json(['success' => true]);
+    }
+
+    /**
+     * Mark all notifications as read.
+     */
+    public function markAllAsRead()
+    {
+        Auth::user()->notifications()->whereNull('read_at')->update(['read_at' => now()]);
+
+        return back()->with('success', 'Todas as notificações foram marcadas como lidas.');
     }
 
     /**

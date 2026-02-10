@@ -9,21 +9,32 @@ use Illuminate\Support\Facades\Auth;
 
 class ReviewController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $user = Auth::user();
 
-        $reviewsQuery = Review::with(['service.professional.profile'])
-            ->where('user_id', $user->id);
+        $baseQuery = Review::where('user_id', $user->id);
 
         $stats = [
-            'average_rating' => number_format($reviewsQuery->avg('rating') ?? 0, 1),
-            'total' => $reviewsQuery->count(),
+            'average_rating' => number_format((clone $baseQuery)->avg('rating') ?? 0, 1),
+            'total' => (clone $baseQuery)->count(),
             'rated_professionals' => Review::where('user_id', $user->id)
                 ->join('services', 'reviews.service_id', '=', 'services.id')
                 ->distinct('services.professional_id')
                 ->count('services.professional_id'),
+            'this_month' => (clone $baseQuery)
+                ->whereMonth('created_at', now()->month)
+                ->whereYear('created_at', now()->year)
+                ->count(),
         ];
+
+        $reviewsQuery = Review::with(['service.professional.profile'])
+            ->where('user_id', $user->id);
+
+        // Filter by rating
+        if ($request->filled('rating')) {
+            $reviewsQuery->where('rating', $request->rating);
+        }
 
         $reviews = $reviewsQuery
             ->orderByRaw('CASE WHEN rating IS NULL THEN 0 ELSE 1 END')
@@ -80,5 +91,44 @@ class ReviewController extends Controller
             ->firstOrFail();
 
         return view('app.review.show', compact('review'));
+    }
+
+    public function edit($id)
+    {
+        $review = Review::with(['service.professional.profile'])
+            ->where('id', $id)
+            ->where('user_id', Auth::id())
+            ->firstOrFail();
+
+        return view('app.review.edit', compact('review'));
+    }
+
+    public function update(Request $request, $id)
+    {
+        $review = Review::where('id', $id)
+            ->where('user_id', Auth::id())
+            ->firstOrFail();
+
+        $validated = $request->validate([
+            'rating' => 'required|integer|min:1|max:5',
+            'comment' => 'required|string|min:5',
+        ]);
+
+        $review->update($validated);
+
+        return redirect()->route('app.review.show', $review->id)
+            ->with('success', 'Avaliação atualizada com sucesso!');
+    }
+
+    public function destroy($id)
+    {
+        $review = Review::where('id', $id)
+            ->where('user_id', Auth::id())
+            ->firstOrFail();
+
+        $review->delete();
+
+        return redirect()->route('app.review.index')
+            ->with('success', 'Avaliação eliminada com sucesso.');
     }
 }

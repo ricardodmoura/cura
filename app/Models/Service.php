@@ -88,14 +88,12 @@ class Service extends Model
         $now = now();
 
         // Regra para Profissionais: 72h de antecedência
-        if ($user->role === 'professional') {
-            // diffInHours negativo significa que a data é no futuro. 
-            // Ex: Se o serviço é daqui a 100h, diff é -100. -100 < -72 é True.
-            return $serviceDate->diffInHours($now, false) < -72; 
+        if ($user->isProfessional()) {
+            return $serviceDate->diffInHours($now, false) < -72;
         }
 
         // Regra para Utentes: 48h de antecedência
-        if (in_array($user->role, ['patient', 'companion'])) {
+        if ($user->isPatientOrCompanion()) {
             return $serviceDate->diffInHours($now, false) < -48;
         }
 
@@ -116,7 +114,7 @@ class Service extends Model
         }
 
         // Apenas utentes podem reagendar
-        if (!in_array($user->role, ['patient', 'companion'])) {
+        if (!$user->isPatientOrCompanion()) {
             return false;
         }
 

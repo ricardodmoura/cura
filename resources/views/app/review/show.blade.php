@@ -81,5 +81,19 @@
         </div>
     </div>
 
+    <div class="mt-6 flex gap-3">
+        <a href="{{ route('app.review.edit', $review->id) }}"
+           class="flex-1 text-center py-3 bg-teal-600 hover:bg-teal-700 text-white font-semibold rounded-xl transition-colors">
+            Editar
+        </a>
+        <form action="{{ route('app.review.destroy', $review->id) }}" method="POST" class="flex-1" onsubmit="return confirm('Tem a certeza que deseja eliminar esta avaliação?');">
+            @csrf
+            @method('DELETE')
+            <button type="submit" class="w-full py-3 bg-red-50 hover:bg-red-100 text-red-600 font-semibold rounded-xl transition-colors">
+                Eliminar
+            </button>
+        </form>
+    </div>
+
 </div>
 @endsection

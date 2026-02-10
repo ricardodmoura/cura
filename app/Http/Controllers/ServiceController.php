@@ -179,4 +179,28 @@ class ServiceController extends Controller
             ->route('app.service.index') // Redirect to list
             ->with('success', 'Serviço atualizado com sucesso!');
     }
+
+    /**
+     * Cancel (soft-delete) the specified service.
+     */
+    public function destroy(Service $service)
+    {
+        $user = Auth::user();
+
+        // Only the patient or assigned professional can cancel
+        if ($service->patient_id !== $user->id && $service->professional_id !== $user->id) {
+            abort(403, 'Acesso não autorizado.');
+        }
+
+        // Validate business rules (status check + time restrictions)
+        if (!$service->canBeCancelled()) {
+            return back()->with('error', 'Este serviço não pode ser cancelado. Verifique o prazo de antecedência necessário.');
+        }
+
+        $service->update(['status' => 'canceled']);
+
+        return redirect()
+            ->route('app.index')
+            ->with('success', 'Serviço cancelado com sucesso.');
+    }
 }

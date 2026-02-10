@@ -20,10 +20,10 @@
                         
                         <div class="flex-1">
                             <p class="text-sm font-medium text-teal-900">
-                                {{ $notification->data['title'] ?? 'Notificação' }}
+                                {{ $notification->title ?? 'Notificação' }}
                             </p>
                             <p class="text-sm text-teal-600 mt-1">
-                                {{ $notification->data['message'] ?? 'Sem mensagem' }}
+                                {{ $notification->description ?? 'Sem mensagem' }}
                             </p>
                             <p class="text-xs text-teal-400 mt-1">
                                 {{ $notification->created_at->diffForHumans() }}
@@ -35,7 +35,7 @@
         </div>
 
         <div class="p-3 border-t border-gray-200 text-center">
-            <a href="#" class="text-sm text-teal-600 hover:text-teal-700 font-medium">
+            <a href="{{ route('app.notifications.index') }}" class="text-sm text-teal-600 hover:text-teal-700 font-medium">
                 Ver todas as notificações
             </a>
         </div>

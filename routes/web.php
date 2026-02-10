@@ -7,6 +7,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\NotificationController;
 use Illuminate\Support\Carbon;
 
 Route::get('/', function () {
@@ -39,6 +40,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/services/{service}/accept', [ServiceController::class, 'accept'])->name('app.service.accept');
     Route::resource('user', UserController::class)->names('app.user')->except(['index', 'create', 'store']);
     Route::resource('review', ReviewController::class)->names('app.review');
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('app.notifications.index');
+    Route::post('/notifications/{notification}/read', [NotificationController::class, 'markAsRead'])->name('app.notifications.read');
+    Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('app.notifications.readAll');
 });
 
 // Fallback route for undefined paths
