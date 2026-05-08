@@ -13,11 +13,11 @@
     <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-6">
         
         <h2 class="text-lg font-bold text-gray-800 mb-5 border-b border-gray-100 pb-2">
-            {{ $review->service->professional->profile->specialty ?? 'Especialidade Geral' }}
+            {{ $review->service->service_type }}
         </h2>
 
         <div class="space-y-4 mb-6">
-            
+
             <div class="flex items-center text-teal-700 font-medium">
                 <div class="w-6 h-6 mr-3 shrink-0">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -25,17 +25,7 @@
                         <circle cx="12" cy="7" r="4"/>
                     </svg>
                 </div>
-                <span>{{ $review->service->professional->name ?? 'Profissional' }}</span>
-            </div>
-
-            <div class="flex items-center text-teal-700 font-medium">
-                <div class="w-6 h-6 mr-3 shrink-0">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-                        <polyline points="9 22 9 12 15 12 15 22"/>
-                    </svg>
-                </div>
-                <span>{{ $review->service->professional->profile->specialty ?? 'Profissional de Saúde' }}</span>
+                <span>{{ $review->ratee?->name ?? 'Pessoa avaliada' }}</span>
             </div>
 
             <div class="flex items-center text-teal-700 font-medium">

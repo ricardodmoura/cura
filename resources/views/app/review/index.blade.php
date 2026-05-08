@@ -47,8 +47,8 @@
                     </svg>
                 </div>
                 <div>
-                    <p class="text-teal-500 font-medium text-xs sm:text-sm">Prof. Avaliados</p>
-                    <p class="text-xl sm:text-3xl font-bold text-teal-900 mt-0.5 sm:mt-1">{{ $stats['rated_professionals'] }}</p>
+                    <p class="text-teal-500 font-medium text-xs sm:text-sm">Pessoas Avaliadas</p>
+                    <p class="text-xl sm:text-3xl font-bold text-teal-900 mt-0.5 sm:mt-1">{{ $stats['rated_people'] }}</p>
                 </div>
             </div>
 
@@ -96,10 +96,10 @@
                         
                         <div>
                             <h3 class="text-lg font-bold text-teal-900 leading-tight">
-                                {{ $review->service->service_type ?? 'Enfermagem' }}
+                                {{ $review->service->service_type ?? 'Serviço' }}
                             </h3>
                             <p class="text-teal-500 text-sm font-medium">
-                                {{ $review->service->professional->name ?? 'Nome Indisponível' }}
+                                {{ $review->ratee?->name ?? 'Nome indisponível' }}
                             </p>
                         </div>
 

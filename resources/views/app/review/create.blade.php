@@ -7,14 +7,14 @@
     <form action="{{ route('app.review.store') }}" method="POST" class="space-y-6">
         @csrf
         <input type="hidden" name="service_id" value="{{ $service->id }}">
-        <input type="hidden" name="rating_overall" id="rating_value" value="0">
+        <input type="hidden" name="rating" id="rating_value" value="0">
 
         {{-- Info do Serviço --}}
         <div class="bg-teal-50 rounded-3xl p-6 border border-teal-100 flex justify-between items-center">
             <div>
-                <p class="text-xs font-bold text-teal-500 uppercase">Serviço</p>
-                <h2 class="text-xl font-bold text-teal-900">{{ $service->service_type }}</h2>
-                <p class="text-sm text-teal-600">{{ $service->professional->name }}</p>
+                <p class="text-xs font-bold text-teal-500 uppercase">Avaliar</p>
+                <h2 class="text-xl font-bold text-teal-900">{{ $ratee->name }}</h2>
+                <p class="text-sm text-teal-600">{{ $service->service_type }} — {{ \Carbon\Carbon::parse($service->date)->format('d/m/Y') }}</p>
             </div>
         </div>
 
@@ -31,7 +31,7 @@
                     </button>
                 @endfor
             </div>
-            @error('rating_overall') <p class="text-red-500 text-xs mt-2">{{ $message }}</p> @enderror
+            @error('rating') <p class="text-red-500 text-xs mt-2">{{ $message }}</p> @enderror
         </div>
 
         {{-- Comentário --}}

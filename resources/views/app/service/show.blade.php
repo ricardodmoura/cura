@@ -160,7 +160,7 @@
             <div class="bg-white rounded-xl shadow-md p-6 space-y-3">
                 <h3 class="text-sm font-medium text-teal-900 mb-3">Ações</h3>
                 
-                @if($service->status == 'pending')
+                @if($service->canBeRescheduled())
                     <a href="{{ route('app.service.edit', $service->id) }}"
                         class="w-full flex items-center justify-center gap-2 bg-teal-600 hover:bg-teal-700 text-white font-semibold py-3 rounded-xl transition-colors">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -168,7 +168,22 @@
                         </svg>
                         Editar
                     </a>
+                @endif
 
+                {{-- Profissional atribuído pode marcar como concluído após a hora do serviço. --}}
+                @if($service->professional_id === auth()->id() && in_array($service->status, ['confirmed', 'accepted', 'in_progress']) && !$service->dateTime->isFuture())
+                    <form action="{{ route('app.service.complete', $service->id) }}" method="POST" onsubmit="return confirm('Marcar serviço como concluído?');">
+                        @csrf
+                        <button type="submit" class="w-full flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded-xl transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                            </svg>
+                            Marcar como concluído
+                        </button>
+                    </form>
+                @endif
+
+                @if($service->canBeCancelled())
                     <form action="{{ route('app.service.destroy', $service->id) }}" method="POST" onsubmit="return confirm('Tem a certeza que deseja cancelar este serviço?');">
                         @csrf
                         @method('DELETE')
@@ -180,6 +195,12 @@
                         </button>
                     </form>
                 @endif
+
+                {{-- Exportar para calendário (.ics) --}}
+                <a href="{{ route('app.service.ics', $service->id) }}"
+                   class="block w-full text-center bg-teal-50 hover:bg-teal-100 text-teal-700 font-semibold py-3 rounded-xl transition-colors">
+                    Adicionar ao calendário (.ics)
+                </a>
 
                 <a href="javascript:history.back()"
                    class="block w-full text-center bg-teal-50 hover:bg-teal-100 text-teal-700 font-semibold py-3 rounded-xl transition-colors">

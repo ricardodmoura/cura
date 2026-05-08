@@ -35,6 +35,8 @@ class UpdateUserRequest extends FormRequest
             'profile.address' => 'nullable|string|max:255',
             'profile.tax_id' => 'nullable|string|max:50',
             'profile.social_security_number' => 'nullable|string|max:50',
+            'profile.notification_preferences' => 'nullable|array',
+            'profile.notification_preferences.*' => 'in:0,1,true,false',
 
             //Medical Info
             'medical_info.blood_type' => 'nullable|string|max:3',

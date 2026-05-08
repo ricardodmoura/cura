@@ -24,4 +24,18 @@ class Review extends Model
     public function user(): BelongsTo {
         return $this->belongsTo(User::class);
     }
+
+    /**
+     * Retorna o utilizador que está a ser avaliado (a outra parte do serviço).
+     * Requer que `service.patient` e `service.professional` estejam carregados.
+     */
+    public function getRateeAttribute(): ?User
+    {
+        if (!$this->service) {
+            return null;
+        }
+        return $this->user_id === $this->service->patient_id
+            ? $this->service->professional
+            : $this->service->patient;
+    }
 }

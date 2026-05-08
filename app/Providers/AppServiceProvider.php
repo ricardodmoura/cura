@@ -5,7 +5,12 @@ namespace App\Providers;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Http\Request;
 use App\Enums\UserType;
+use App\Models\User;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -22,6 +27,20 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Gate para áreas administrativas — gated por User.is_admin.
+        Gate::define('admin', fn (User $user) => $user->isAdmin());
+
+        // Rate limiters para rotas sensíveis de autenticação.
+        // 'auth': login/register/reset — 5 tentativas por minuto por IP+email.
+        RateLimiter::for('auth', function (Request $request) {
+            $key = ($request->input('email') ?? '') . '|' . $request->ip();
+            return Limit::perMinute(5)->by($key);
+        });
+        // 'password-reset': mais apertado por estar a enviar emails.
+        RateLimiter::for('password-reset', function (Request $request) {
+            return Limit::perMinute(3)->by($request->ip());
+        });
+
         // Diretiva para verificar se é Utente: @patient ... @endpatient
         Blade::if('patient', function () {
             $user = Auth::user();

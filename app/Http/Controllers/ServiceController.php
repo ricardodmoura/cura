@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Log;
 use App\Models\Service;
-use Illuminate\Http\Request; 
+use App\Models\ServiceDismissal;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Http\Requests\StoreServiceRequest; 
+use App\Http\Requests\StoreServiceRequest;
 use App\Http\Requests\UpdateServiceRequest;
 
 class ServiceController extends Controller
@@ -26,7 +28,8 @@ class ServiceController extends Controller
         // 1. QUERY MARKETPLACE (Serviços disponíveis para aceitar)
         $marketplaceQuery = Service::where('status', 'pending')
                         ->whereNull('professional_id')
-                        ->where('patient_id', '!=', Auth::id()) 
+                        ->where('patient_id', '!=', Auth::id())
+                        ->whereDoesntHave('dismissals', fn ($q) => $q->where('user_id', Auth::id()))
                         ->with('patient');
 
         if ($request->filled('filter')) {
@@ -58,6 +61,17 @@ class ServiceController extends Controller
      */
     public function accept(Service $service)
     {
+        // Apenas profissionais podem aceitar serviços do marketplace.
+        abort_unless(Auth::user()->isProfessional(), 403);
+
+        // Profissional precisa de pelo menos uma qualificação verificada.
+        $hasVerified = Auth::user()->qualifications()
+            ->where('verification_status', \App\Models\Qualification::STATUS_VERIFIED)
+            ->exists();
+        if (!$hasVerified) {
+            return back()->with('error', 'A sua cédula ainda não foi verificada. Não pode aceitar serviços até a equipa Cura concluir a verificação.');
+        }
+
         // 1. Verify if the service is still available
         if ($service->professional_id !== null) {
             return back()->with('error', 'Este serviço já foi aceite por outro profissional.');
@@ -69,7 +83,104 @@ class ServiceController extends Controller
             'status' => 'confirmed' // Change status to confirmed/active
         ]);
 
+        Log::record('service.accept', "Service #{$service->id}");
+
         return redirect()->route('app.service.index')->with('success', 'Serviço aceite com sucesso! Pode vê-lo na sua agenda.');
+    }
+
+    /**
+     * Profissional dispensa o serviço — fica oculto do seu pool, sem afetar outros.
+     */
+    public function dismiss(Service $service)
+    {
+        abort_unless(Auth::user()->isProfessional(), 403);
+
+        if ($service->professional_id !== null) {
+            return back()->with('error', 'Este serviço já foi atribuído.');
+        }
+
+        ServiceDismissal::firstOrCreate([
+            'service_id' => $service->id,
+            'user_id' => Auth::id(),
+        ]);
+
+        Log::record('service.dismiss', "Service #{$service->id}");
+
+        return back()->with('success', 'Serviço dispensado.');
+    }
+
+    /**
+     * Profissional atribuído marca o serviço como concluído.
+     */
+    public function markCompleted(Service $service)
+    {
+        abort_unless($service->professional_id === Auth::id(), 403);
+
+        if (!in_array($service->status, ['confirmed', 'accepted', 'in_progress'])) {
+            return back()->with('error', 'Este serviço não pode ser marcado como concluído.');
+        }
+
+        // Não pode ser concluído antes da hora marcada — só após a prestação.
+        if ($service->dateTime->isFuture()) {
+            return back()->with('error', 'Só é possível marcar como concluído após a data/hora do serviço.');
+        }
+
+        $service->update(['status' => 'completed']);
+
+        // Cria stubs (rating=null) para ambas as partes — aparecem como "Por Avaliar".
+        \App\Models\Review::firstOrCreate(
+            ['service_id' => $service->id, 'user_id' => $service->patient_id],
+            ['rating' => null, 'comment' => null]
+        );
+        \App\Models\Review::firstOrCreate(
+            ['service_id' => $service->id, 'user_id' => $service->professional_id],
+            ['rating' => null, 'comment' => null]
+        );
+
+        Log::record('service.complete', "Service #{$service->id}");
+
+        return back()->with('success', 'Serviço marcado como concluído.');
+    }
+
+    /**
+     * Exporta o serviço como ficheiro iCalendar (.ics) para o calendário do utilizador.
+     */
+    public function exportIcs(Service $service)
+    {
+        abort_unless(
+            $service->patient_id === Auth::id() || $service->professional_id === Auth::id(),
+            403
+        );
+
+        $start = \Carbon\Carbon::parse(
+            $service->date->format('Y-m-d') . ' ' . $service->time->format('H:i')
+        );
+        $end = $start->copy()->addHour();
+
+        $escape = fn ($v) => preg_replace('/([,;\\\\])/', '\\\\$1', str_replace(["\r\n", "\r", "\n"], '\\n', (string) $v));
+
+        $lines = [
+            'BEGIN:VCALENDAR',
+            'VERSION:2.0',
+            'PRODID:-//Cura//Cura Health//PT',
+            'CALSCALE:GREGORIAN',
+            'METHOD:PUBLISH',
+            'BEGIN:VEVENT',
+            'UID:cura-service-' . $service->id . '@cura.pt',
+            'DTSTAMP:' . now()->utc()->format('Ymd\\THis\\Z'),
+            'DTSTART:' . $start->utc()->format('Ymd\\THis\\Z'),
+            'DTEND:' . $end->utc()->format('Ymd\\THis\\Z'),
+            'SUMMARY:' . $escape('Cura — ' . $service->service_type),
+            'LOCATION:' . $escape($service->location),
+            'DESCRIPTION:' . $escape($service->report ?? ''),
+            'END:VEVENT',
+            'END:VCALENDAR',
+        ];
+
+        return response(implode("\r\n", $lines) . "\r\n", 200, [
+            'Content-Type' => 'text/calendar; charset=utf-8',
+            'Content-Disposition' => 'attachment; filename="cura-service-' . $service->id . '.ics"',
+        ]);
     }
 
     /**
@@ -96,8 +207,7 @@ class ServiceController extends Controller
 
         $selectedService = $this->catalog[$validated['service_type']];
 
-        // Create the record
-        Service::create([
+        $service = Service::create([
             'patient_id'   => Auth::id(),
             'service_type' => $selectedService['label'],
             'price'        => $selectedService['price'],
@@ -105,10 +215,12 @@ class ServiceController extends Controller
             'time'         => $validated['time'],
             'location'     => $validated['location'],
             // Use $validated['notes'] instead of $request->notes for security
-            'report'       => $validated['notes'] ?? null, 
+            'report'       => $validated['notes'] ?? null,
             'status'       => 'pending',
             'professional_id' => null,
         ]);
+
+        Log::record('service.create', "Service #{$service->id} ({$service->service_type})");
 
         return redirect()
             ->route('app.index') // Redirect to main app dashboard
@@ -164,7 +276,11 @@ class ServiceController extends Controller
         
         $selectedService = $this->catalog[$validated['service_type']];
 
-        // Update the record
+        // Patient só pode editar enquanto o serviço está pending; status é gerido por accept/markCompleted/destroy.
+        if ($service->status !== 'pending') {
+            return back()->with('error', 'Apenas serviços pendentes podem ser editados.');
+        }
+
         $service->update([
             'service_type' => $selectedService['label'],
             'price'        => $selectedService['price'],
@@ -172,7 +288,6 @@ class ServiceController extends Controller
             'time'         => $validated['time'],
             'location'     => $validated['location'],
             'report'       => $validated['notes'] ?? null,
-            'status'       => $validated['status'], // Now we update the status too
         ]);
 
         return redirect()
@@ -198,6 +313,8 @@ class ServiceController extends Controller
         }
 
         $service->update(['status' => 'canceled']);
+
+        Log::record('service.cancel', "Service #{$service->id} cancelled by user #{$user->id}");
 
         return redirect()
             ->route('app.index')

@@ -19,6 +19,15 @@ class MedicalInfo extends Model
         'emergency_contact',
     ];
 
+    // GDPR Art. 9: dados de saúde são categoria especial, encriptados em coluna.
+    protected $casts = [
+        'blood_type' => 'encrypted',
+        'allergies' => 'encrypted',
+        'medical_conditions' => 'encrypted',
+        'current_medications' => 'encrypted',
+        'emergency_contact' => 'encrypted',
+    ];
+
     /**
      * A informação médica pertence a um Utilizador (User).
      */

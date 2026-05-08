@@ -89,9 +89,9 @@
                 <form action="{{ route('app.service.index') }}" method="GET">
                     <select name="filter" onchange="this.form.submit()" class="appearance-none bg-white border border-teal-100 text-teal-900 text-sm font-bold rounded-full py-2 pl-4 pr-10 focus:outline-none focus:ring-2 focus:ring-teal-500 shadow-sm cursor-pointer hover:bg-teal-50 transition-colors">
                         <option value="">Filtrar</option>
-                        <option value="Enfermagem" {{ request('filter') == 'Enfermagem' ? 'selected' : '' }}>Enfermagem</option>
-                        <option value="Médica" {{ request('filter') == 'Médica' ? 'selected' : '' }}>Médica</option>
-                        <option value="Auxiliar" {{ request('filter') == 'Auxiliar' ? 'selected' : '' }}>Auxiliar</option>
+                        @foreach(['Consulta' => 'Consulta', 'Higiene' => 'Higiene', 'Penso' => 'Pensos', 'Injetáveis' => 'Injetáveis', 'Alimentação' => 'Alimentação'] as $value => $label)
+                            <option value="{{ $value }}" {{ request('filter') == $value ? 'selected' : '' }}>{{ $label }}</option>
+                        @endforeach
                     </select>
                     <i data-lucide="chevron-down" class="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-teal-900 pointer-events-none"></i>
                 </form>
@@ -161,24 +161,17 @@
                         </button>
                     </form>
 
-                    <button type="button" onclick="dismissService({{ $service->id }}, this)" class="h-1/2 w-full bg-[#FEE2E2] hover:bg-red-200 transition-colors flex items-center justify-center group cursor-pointer">
-                        <div class="w-8 h-8 rounded-full border-2 border-[#EF4444] flex items-center justify-center text-[#EF4444] bg-transparent group-hover:bg-[#EF4444] group-hover:text-white transition-all">
-                            <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="32"
-                            height="32"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="#C40000"
-                            stroke-width="2"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            >
-                            <path d="M18 6l-12 12" />
-                            <path d="M6 6l12 12" />
-                            </svg>
-                        </div>
-                    </button>
+                    <form action="{{ route('app.service.dismiss', $service->id) }}" method="POST" class="h-1/2 w-full">
+                        @csrf
+                        <button type="submit" class="w-full h-full bg-[#FEE2E2] hover:bg-red-200 transition-colors flex items-center justify-center group cursor-pointer">
+                            <div class="w-8 h-8 rounded-full border-2 border-[#EF4444] flex items-center justify-center text-[#EF4444] bg-transparent group-hover:bg-[#EF4444] group-hover:text-white transition-all">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#C40000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M18 6l-12 12" />
+                                    <path d="M6 6l12 12" />
+                                </svg>
+                            </div>
+                        </button>
+                    </form>
                 </div>
 
             </div>
@@ -194,17 +187,5 @@
     </div>
 </div>
 
-
-<script>
-function dismissService(serviceId, btn) {
-    const card = btn.closest('[data-service-card]');
-    if (card) {
-        card.style.transition = 'opacity 0.3s, transform 0.3s';
-        card.style.opacity = '0';
-        card.style.transform = 'translateX(100%)';
-        setTimeout(() => card.remove(), 300);
-    }
-}
-</script>
 
 @endsection

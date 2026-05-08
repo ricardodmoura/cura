@@ -11,9 +11,9 @@
         {{-- Info do Serviço --}}
         <div class="bg-teal-50 rounded-3xl p-6 border border-teal-100 flex justify-between items-center">
             <div>
-                <p class="text-xs font-bold text-teal-500 uppercase">Serviço</p>
-                <h2 class="text-xl font-bold text-teal-900">{{ $review->service->service_type }}</h2>
-                <p class="text-sm text-teal-600">{{ $review->service->professional->name ?? 'Profissional' }}</p>
+                <p class="text-xs font-bold text-teal-500 uppercase">Avaliar</p>
+                <h2 class="text-xl font-bold text-teal-900">{{ $review->ratee?->name ?? 'Pessoa avaliada' }}</h2>
+                <p class="text-sm text-teal-600">{{ $review->service->service_type }}</p>
             </div>
         </div>
 

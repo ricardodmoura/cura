@@ -241,6 +241,38 @@
         </section>
         @endif
 
+        <!-- Preferências de Notificação -->
+        <section>
+            <h2 class="text-xl font-semibold text-teal-900 mb-6 border-b border-teal-500 pb-2">
+                Notificações
+            </h2>
+            <p class="text-sm text-teal-600 mb-4">Escolha que tipos de notificações deseja receber na app.</p>
+            @php
+                $prefs = $user->profile->notification_preferences ?? [];
+                $defaults = \App\Models\Profile::NOTIFICATION_DEFAULTS;
+                $options = [
+                    'service_updates' => 'Atualizações de serviços (aceite, reagendado, cancelado, concluído)',
+                    'review_received' => 'Avaliações recebidas',
+                    'marketing' => 'Novidades e promoções',
+                ];
+            @endphp
+            <div class="space-y-3">
+                @foreach($options as $key => $label)
+                    @php $checked = $prefs[$key] ?? ($defaults[$key] ?? true); @endphp
+                    <label class="flex items-center gap-3 cursor-pointer">
+                        {{-- hidden=0 antes do checkbox: garante que o valor é submetido mesmo quando desmarcado --}}
+                        <input type="hidden" name="profile[notification_preferences][{{ $key }}]" value="0">
+                        <input type="checkbox"
+                               name="profile[notification_preferences][{{ $key }}]"
+                               value="1"
+                               class="w-5 h-5 rounded border-teal-300 text-teal-600 focus:ring-teal-500"
+                               {{ $checked ? 'checked' : '' }}>
+                        <span class="text-teal-900">{{ $label }}</span>
+                    </label>
+                @endforeach
+            </div>
+        </section>
+
         <!-- Palavra-passe -->
         <section>
             <h2 class="text-xl font-semibold text-teal-900 mb-6 border-b border-teal-500 pb-2">

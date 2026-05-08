@@ -59,6 +59,14 @@ class Service extends Model
         return $this->hasMany(Review::class);
     }
 
+    /**
+     * Profissionais que dispensaram este serviço (não querem ver no pool).
+     */
+    public function dismissals(): HasMany
+    {
+        return $this->hasMany(ServiceDismissal::class);
+    }
+
     // =========================================================
     // MÉTODOS DE LÓGICA DE NEGÓCIO 
     // =========================================================
@@ -78,25 +86,28 @@ class Service extends Model
     public function canBeCancelled()
     {
         $user = Auth::user();
-        
-        // Se o serviço já foi concluído ou cancelado, não se pode mexer
+        if (!$user) {
+            return false;
+        }
+
         if (in_array(strtolower($this->status), ['completed', 'canceled'])) {
             return false;
         }
 
-        $serviceDate = $this->dateTime; // Usa o acessor que criámos acima
-        $now = now();
-
-        // Regra para Profissionais: 72h de antecedência
-        if ($user->isProfessional()) {
-            return $serviceDate->diffInHours($now, false) < -72;
+        // Utente pode cancelar livremente enquanto nenhum profissional aceitou.
+        if ($user->isPatientOrCompanion() && $this->professional_id === null) {
+            return $user->id === $this->patient_id;
         }
 
-        // Regra para Utentes: 48h de antecedência
-        if ($user->isPatientOrCompanion()) {
-            return $serviceDate->diffInHours($now, false) < -48;
-        }
+        // Caso contrário, regra de antecedência: 72h prof, 48h utente.
+        $hoursAhead = now()->diffInHours($this->dateTime, false);
 
+        if ($user->isProfessional() && $user->id === $this->professional_id) {
+            return $hoursAhead >= 72;
+        }
+        if ($user->isPatientOrCompanion() && $user->id === $this->patient_id) {
+            return $hoursAhead >= 48;
+        }
         return false;
     }
 
@@ -107,21 +118,12 @@ class Service extends Model
     public function canBeRescheduled()
     {
         $user = Auth::user();
-        
-        // Se já passou ou foi cancelado, nada feito
+        if (!$user || !$user->isPatientOrCompanion() || $user->id !== $this->patient_id) {
+            return false;
+        }
         if (in_array(strtolower($this->status), ['completed', 'canceled'])) {
             return false;
         }
-
-        // Apenas utentes podem reagendar
-        if (!$user->isPatientOrCompanion()) {
-            return false;
-        }
-
-        $serviceDate = $this->dateTime;
-        $now = now();
-
-        // Regra: Mais de 48h de antecedência
-        return $serviceDate->diffInHours($now, false) < -48;
+        return now()->diffInHours($this->dateTime, false) >= 48;
     }
 }

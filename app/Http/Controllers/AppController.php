@@ -37,10 +37,8 @@ class AppController extends Controller
             
             'completed' => (clone $query)->where('status', 'completed')->count(),
             
-            // Média (Rating):
-            // Como ainda não temos tabela de reviews ligada, deixamos um valor dinâmico
-            // Apenas profissionais têm rating visível habitualmente
-            'rating'    => $user->isProfessional() ? 4.9 : '--',
+            // Média das avaliações recebidas (utentes e profissionais podem ambos ser avaliados).
+            'rating'    => $user->averageRatingReceived() ?? '--',
         ];
 
         // 4. Obter a lista dos 5 serviços mais recentes para o histórico

@@ -6,12 +6,15 @@ use App\Enums\UserType;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
     use HasFactory, Notifiable;
+
+    public const CURRENT_CONSENT_VERSION = '2026-05-08';
 
     /**
      * The attributes that are mass assignable.
@@ -22,6 +25,9 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'is_admin',
+        'consented_at',
+        'consent_version',
     ];
 
     /**
@@ -41,8 +47,15 @@ class User extends Authenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'consented_at' => 'datetime',
+        'is_admin' => 'boolean',
         'password' => 'hashed',
     ];
+
+    public function isAdmin(): bool
+    {
+        return (bool) $this->is_admin;
+    }
 
     /**
      * Um Utilizador tem um Perfil (Profile).
@@ -133,5 +146,31 @@ class User extends Authenticatable
             UserType::PATIENT->value,
             UserType::COMPANION->value,
         ]);
+    }
+
+    /**
+     * Média das avaliações recebidas (em ambas as direções: como utente e como profissional).
+     * O avaliador é a OUTRA parte do serviço — nunca o próprio.
+     */
+    public function averageRatingReceived(): ?float
+    {
+        $avg = \DB::table('reviews')
+            ->join('services', 'reviews.service_id', '=', 'services.id')
+            ->where(function ($q) {
+                // Avaliação que recebi como utente: prof avalia o serviço onde sou paciente.
+                $q->where(function ($qq) {
+                    $qq->where('services.patient_id', $this->id)
+                       ->whereColumn('reviews.user_id', 'services.professional_id');
+                })
+                // Avaliação que recebi como profissional: utente avalia o serviço onde sou prof.
+                ->orWhere(function ($qq) {
+                    $qq->where('services.professional_id', $this->id)
+                       ->whereColumn('reviews.user_id', 'services.patient_id');
+                });
+            })
+            ->whereNotNull('reviews.rating')
+            ->avg('reviews.rating');
+
+        return $avg !== null ? round((float) $avg, 1) : null;
     }
 }

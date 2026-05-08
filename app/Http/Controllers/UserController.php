@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Log;
 use App\Models\User;
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
@@ -40,6 +41,13 @@ class UserController extends Controller
      */
     public function show(User $user)
     {
+        $this->authorize('view', $user);
+
+        // Logo só acessos cruzados (GDPR Art. 32 — auditoria de leitura de dados de saúde).
+        if (Auth::id() !== $user->id) {
+            Log::record('profile.view.other', "Viewed user #{$user->id}");
+        }
+
         $user->load('medicalInfo', 'qualifications');
 
         return view('app.user.show', compact('user'));
@@ -56,6 +64,8 @@ class UserController extends Controller
      */
     public function edit(User $user)
     {
+        $this->authorize('update', $user);
+
         $user->load('medicalInfo', 'qualifications');
 
         return view('app.user.edit', compact('user'));
@@ -76,7 +86,21 @@ class UserController extends Controller
      */
     public function update(UpdateUserRequest $request, User $user)
     {
+        $this->authorize('update', $user);
+
         $data = $request->validated();
+
+        // user_type só é alterável via suporte (a UI mostra o select como disabled).
+        // O hidden input ainda envia o valor, mas ignoramo-lo aqui para impedir auto-promoção.
+        unset($data['profile']['user_type']);
+
+        // Normalizar preferências de notificação para booleanos (form envia '0'/'1' como strings).
+        if (isset($data['profile']['notification_preferences'])) {
+            $data['profile']['notification_preferences'] = array_map(
+                fn ($v) => filter_var($v, FILTER_VALIDATE_BOOLEAN),
+                $data['profile']['notification_preferences']
+            );
+        }
 
         // Se a password vier vazia (null), removemos a chave do array para não atualizar
         if (empty($data['user']['password'])) {
@@ -102,6 +126,7 @@ class UserController extends Controller
                 ['user_id' => $user->id],
                 $data['medical_info']
             );
+            Log::record('medical_info.update', "Updated medical info for user #{$user->id}");
         }
 
         if (!empty($data['qualifications'])) {
@@ -114,6 +139,8 @@ class UserController extends Controller
                 $data['qualifications']
             );
         }
+
+        Log::record('profile.update', "User #{$user->id} updated profile");
 
         return redirect()->route('app.user.show', $user)->with('success', 'Perfil atualizado com sucesso.');
     }
@@ -132,18 +159,25 @@ class UserController extends Controller
      */
     public function destroy(User $user)
     {
+        $this->authorize('delete', $user);
+
+        $userId = $user->id;
+        $userEmail = $user->email;
+
         DB::transaction(function () use ($user) {
-            // 1. Apagar perfis e dados médicos
             $user->profile()->delete();
             $user->medicalInfo()->delete();
             $user->qualifications()->delete();
-            $user->reviews()->delete(); 
-            $user->servicesAsPatient()->delete();           
+            $user->reviews()->delete();
+            $user->servicesAsPatient()->delete();
             $user->servicesAsProfessional()->delete();
             $user->delete();
         });
 
         Auth::logout();
+
+        // user_id null porque a conta já não existe; mantemos o detalhe para a auditoria.
+        Log::record('account.delete', "Deleted user #{$userId} ({$userEmail})", null);
 
         return redirect()->route('landing')->with('success', 'Conta eliminada.');
     }

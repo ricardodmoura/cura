@@ -60,6 +60,9 @@
 
                     <div id="profileMenu" class="hidden absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg py-2">
                         <a href="{{ route('app.user.show', Auth::user()) }}" class="block px-4 py-2 text-gray-700 hover:bg-teal-50 hover:text-teal-700">Ver Perfil</a>
+                        @can('admin')
+                            <a href="{{ route('admin.qualifications.index') }}" class="block px-4 py-2 text-gray-700 hover:bg-teal-50 hover:text-teal-700">Admin · Cédulas</a>
+                        @endcan
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
                             <button class="w-full text-left px-4 py-2 text-gray-700 hover:bg-teal-50 hover:text-teal-700">Terminar Sessão</button>

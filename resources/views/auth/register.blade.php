@@ -160,7 +160,18 @@
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
                         Qualificações
                     </h3>
-                    
+
+                    <div class="bg-yellow-50 border-l-4 border-yellow-400 text-yellow-800 p-3 rounded text-sm">
+                        A sua cédula será verificada manualmente pela equipa Cura junto da Ordem (OM/OE/OMD).
+                        Só poderá aceitar serviços depois desta verificação.
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-teal-900 mb-1">Número de Cédula <span class="text-red-500">*</span></label>
+                        <input type="text" name="qualifications[cedula_number]" value="{{ old('qualifications.cedula_number') }}" placeholder="Ex: 12345"
+                            class="w-full px-4 py-3 border border-teal-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 transition-all">
+                    </div>
+
                     <div>
                         <label class="block text-sm font-medium text-teal-900 mb-1">Resumo Profissional</label>
                         <textarea name="qualifications[description]" rows="3" placeholder="Descreva a sua experiência profissional..."
@@ -168,9 +179,9 @@
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-teal-900 mb-2">Comprovativo de Cédula/Habilitações</label>
+                        <label class="block text-sm font-medium text-teal-900 mb-2">Comprovativo de Cédula/Habilitações <span class="text-red-500">*</span></label>
                         <div class="border-2 border-dashed border-teal-200 rounded-xl p-6 text-center hover:border-teal-400 transition-colors cursor-pointer relative bg-teal-50/30">
-                            <input type="file" name="qualifications[document]" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"> 
+                            <input type="file" name="qualifications[document]" accept="application/pdf,image/jpeg,image/png" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
                             <svg class="w-8 h-8 text-teal-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
                             </svg>
@@ -198,6 +209,20 @@
                                 class="w-full px-4 py-3 border border-teal-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 transition-all">
                         </div>
                     </div>
+                </div>
+
+                <div class="border-t border-gray-100 pt-6">
+                    <label class="flex items-start gap-3 cursor-pointer">
+                        <input type="checkbox" name="consent" value="1" required
+                               class="mt-1 w-5 h-5 rounded border-teal-300 text-teal-600 focus:ring-teal-500">
+                        <span class="text-sm text-teal-900">
+                            Li e aceito os
+                            <a href="{{ route('terms-of-service') }}" target="_blank" class="font-semibold underline">Termos de Serviço</a>
+                            e a
+                            <a href="{{ route('privacy-policy') }}" target="_blank" class="font-semibold underline">Política de Privacidade</a>,
+                            incluindo o tratamento de dados de saúde para fins de prestação do serviço (RGPD Art. 9.º, n.º 2, alínea h).
+                        </span>
+                    </label>
                 </div>
 
                 <div class="flex flex-col sm:flex-row gap-4 pt-4">

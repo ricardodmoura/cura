@@ -46,7 +46,16 @@ class DatabaseSeeder extends Seeder
             'user_type' => UserType::DOCTOR,
         ]);
 
-        Qualification::factory()->create(['user_id' => $medicoPrincipal->id]);
+        // Cédula já verificada para o médico principal — pode aceitar serviços de imediato.
+        Qualification::factory()->verified()->create(['user_id' => $medicoPrincipal->id]);
+
+        // Conta de administração para a equipa Cura (usar para verificar qualificações).
+        $admin = User::factory()->admin()->create([
+            'name' => 'Cura Admin',
+            'email' => 'admin@cura.pt',
+            'password' => Hash::make('password'),
+        ]);
+        Profile::factory()->create(['user_id' => $admin->id, 'user_type' => UserType::DOCTOR]);
 
         /*
         |--------------------------------------------------------------------------
@@ -55,7 +64,7 @@ class DatabaseSeeder extends Seeder
         */
         $outrosProfissionais = User::factory(10)->create()->each(function ($user) {
             Profile::factory()->create(['user_id' => $user->id, 'user_type' => UserType::DOCTOR]);
-            Qualification::factory()->create(['user_id' => $user->id]);
+            Qualification::factory()->verified()->create(['user_id' => $user->id]);
         });
 
         $todosMedicos = $outrosProfissionais->push($medicoPrincipal);
@@ -89,12 +98,22 @@ class DatabaseSeeder extends Seeder
             ]);
 
             $rating = rand(3, 5);
+            // Patient → Professional
             Review::create([
                 'service_id' => $service->id,
                 'user_id' => $utente->id,
                 'rating' => $rating,
                 'comment' => $comentarios[$rating][array_rand($comentarios[$rating])],
-                'created_at' => $dataPassada->copy()->addHours(4), // Review feita no próprio dia
+                'created_at' => $dataPassada->copy()->addHours(4),
+            ]);
+            // Professional → Patient (também avaliação bidirecional)
+            $reverseRating = rand(4, 5); // utentes seedados com ratings altos
+            Review::create([
+                'service_id' => $service->id,
+                'user_id' => $medico->id,
+                'rating' => $reverseRating,
+                'comment' => 'Utente colaborativo e pontual.',
+                'created_at' => $dataPassada->copy()->addHours(5),
             ]);
         }
 
@@ -112,9 +131,16 @@ class DatabaseSeeder extends Seeder
                 'created_at' => $dataRecente->copy()->subHours(2),
             ]);
 
+            // Stubs nos dois sentidos — ambos veem "Por Avaliar".
             Review::create([
                 'service_id' => $service->id,
                 'user_id' => $utente->id,
+                'rating' => null,
+                'comment' => null,
+            ]);
+            Review::create([
+                'service_id' => $service->id,
+                'user_id' => $medico->id,
                 'rating' => null,
                 'comment' => null,
             ]);
@@ -147,5 +173,6 @@ class DatabaseSeeder extends Seeder
         $this->command->info('Base de dados populada!');
         $this->command->info('Utilizador Utente: ricardoUtente@cura.pt / password');
         $this->command->info('Utilizador Médico: vitorMedico@cura.pt / password');
+        $this->command->info('Admin Cura:        admin@cura.pt / password');
     }
 }

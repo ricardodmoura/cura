@@ -15,11 +15,11 @@ class UpdateServiceRequest extends FormRequest
     {
         return [
             'service_type' => 'required|string',
-            'date'         => 'required|date|after:today', // Removemos 'after_or_equal:today' para permitir editar agendamentos de hoje sem erro
+            'date'         => 'required|date|after:today',
             'time'         => 'required',
             'location'     => 'required|string|min:5',
             'notes'        => 'nullable|string',
-            'status'       => 'required|in:pending,confirmed,completed,canceled', // Validação do novo campo
+            // status NÃO é editável pelo paciente — ver ServiceController::accept/markCompleted/destroy.
         ];
     }
 }

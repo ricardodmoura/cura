@@ -18,17 +18,20 @@ class ReviewController extends Controller
         $stats = [
             'average_rating' => number_format((clone $baseQuery)->avg('rating') ?? 0, 1),
             'total' => (clone $baseQuery)->count(),
-            'rated_professionals' => Review::where('user_id', $user->id)
+            // Pessoas distintas que avaliei (em qualquer direção — prof ou utente).
+            'rated_people' => (clone $baseQuery)
                 ->join('services', 'reviews.service_id', '=', 'services.id')
-                ->distinct('services.professional_id')
-                ->count('services.professional_id'),
+                ->whereNotNull('reviews.rating')
+                ->selectRaw('CASE WHEN reviews.user_id = services.patient_id THEN services.professional_id ELSE services.patient_id END as ratee_id')
+                ->distinct()
+                ->count(),
             'this_month' => (clone $baseQuery)
                 ->whereMonth('created_at', now()->month)
                 ->whereYear('created_at', now()->year)
                 ->count(),
         ];
 
-        $reviewsQuery = Review::with(['service.professional.profile'])
+        $reviewsQuery = Review::with(['service.professional.profile', 'service.patient.profile'])
             ->where('user_id', $user->id);
 
         // Filter by rating
@@ -51,12 +54,18 @@ class ReviewController extends Controller
             return redirect()->route('app.review.index')->with('error', 'Serviço não especificado.');
         }
 
-        $service = Service::with('professional.profile')
+        // Tanto o utente como o profissional podem avaliar o outro lado, mas só após conclusão.
+        $service = Service::with(['professional.profile', 'patient.profile'])
             ->where('id', $serviceId)
-            ->where('patient_id', Auth::id())
+            ->where(function ($q) {
+                $q->where('patient_id', Auth::id())->orWhere('professional_id', Auth::id());
+            })
+            ->where('status', 'completed')
             ->firstOrFail();
 
-        return view('app.review.create', compact('service'));
+        $ratee = Auth::id() === $service->patient_id ? $service->professional : $service->patient;
+
+        return view('app.review.create', compact('service', 'ratee'));
     }
 
     public function store(Request $request)
@@ -67,16 +76,17 @@ class ReviewController extends Controller
             'comment' => 'required|string|min:5',
         ]);
 
+        // Só o paciente ou o profissional do serviço podem avaliar, e só após conclusão.
+        $service = Service::where('id', $validated['service_id'])
+            ->where(function ($q) {
+                $q->where('patient_id', Auth::id())->orWhere('professional_id', Auth::id());
+            })
+            ->where('status', 'completed')
+            ->firstOrFail();
+
         Review::updateOrCreate(
-            [
-                'service_id' => $validated['service_id'],
-                'user_id' => Auth::id()
-            ],
-            [
-                'rating' => $validated['rating'],
-                'comment' => $validated['comment'],
-                'updated_at' => now() 
-            ]
+            ['service_id' => $service->id, 'user_id' => Auth::id()],
+            ['rating' => $validated['rating'], 'comment' => $validated['comment'], 'updated_at' => now()],
         );
 
         return redirect()->route('app.review.index')->with('success', 'Avaliação registada com sucesso!');
@@ -84,8 +94,7 @@ class ReviewController extends Controller
 
     public function show($id)
     {
-        // Validar que a review existe e pertence ao utilizador logado
-        $review = Review::with(['service.professional.profile'])
+        $review = Review::with(['service.professional.profile', 'service.patient.profile'])
             ->where('id', $id)
             ->where('user_id', Auth::id())
             ->firstOrFail();
@@ -95,7 +104,7 @@ class ReviewController extends Controller
 
     public function edit($id)
     {
-        $review = Review::with(['service.professional.profile'])
+        $review = Review::with(['service.professional.profile', 'service.patient.profile'])
             ->where('id', $id)
             ->where('user_id', Auth::id())
             ->firstOrFail();

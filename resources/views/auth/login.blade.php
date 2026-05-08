@@ -22,6 +22,20 @@
                 <p class="text-teal-600">Bem-vindo</p>
             </div>
 
+            @if (session('status'))
+                <div class="mb-4 p-3 rounded-xl bg-green-50 border border-green-200 text-green-800 text-sm">
+                    {{ session('status') }}
+                </div>
+            @endif
+
+            @if ($errors->any())
+                <div class="mb-4 p-3 rounded-xl bg-red-50 border border-red-200 text-red-800 text-sm">
+                    @foreach ($errors->all() as $error)
+                        <p>{{ $error }}</p>
+                    @endforeach
+                </div>
+            @endif
+
             <form id="loginForm" class="space-y-6" method="POST" action="{{ route('login.post') }}">
                 @csrf
                 <div>
@@ -50,6 +64,12 @@
                             </svg>
                         </button>
                     </div>
+                </div>
+
+                <div class="text-right">
+                    <a href="{{ route('password.request') }}" class="text-xs text-teal-600 hover:text-teal-800 underline">
+                        Esqueceu a sua palavra-passe?
+                    </a>
                 </div>
 
                 <!-- Updated button styling and added loading state -->

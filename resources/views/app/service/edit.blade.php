@@ -30,25 +30,6 @@
 
             <div>
                 <label class="block text-sm font-medium text-teal-900 mb-2">
-                    Estado do Serviço
-                </label>
-                <div class="relative">
-                    <select name="status" required class="w-full pl-4 pr-10 py-3 border border-teal-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent appearance-none bg-teal-50/50">
-                        @foreach(['pending' => 'Pendente', 'confirmed' => 'Confirmado', 'completed' => 'Completado', 'canceled' => 'Cancelado'] as $value => $label)
-                            <option value="{{ $value }}" {{ old('status', $service->status) == $value ? 'selected' : '' }}>
-                                {{ $label }}
-                            </option>
-                        @endforeach
-                    </select>
-                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-teal-500">
-                        <i data-lucide="chevron-down" class="w-4 h-4"></i>
-                    </div>
-                </div>
-                @error('status') <p class="text-red-500 text-sm mt-1">{{ $message }}</p> @enderror
-            </div>
-
-            <div>
-                <label class="block text-sm font-medium text-teal-900 mb-2">
                     Tipo de Serviço <span class="text-red-500">*</span>
                 </label>
                 <div class="relative">
